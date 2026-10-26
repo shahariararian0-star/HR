@@ -18,6 +18,7 @@ export const changelog: ChangelogRelease[] = [
     date: '2026-10-26',
     title: 'Clearer Payment Settings description',
     entries: [
+      { type: 'fix', description: 'The llms.txt build step now honours ALLOW_EMPTY_CONTENT=1 like the sitemap and feed steps, so a new site with no published blog posts or guides yet can build and deploy.' },
       { type: 'improvement', description: 'Super Admin → Payments now explains that the plans and prices set there appear on the home page as well as the Upgrade page.' },
     ],
   },

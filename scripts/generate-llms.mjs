@@ -136,7 +136,7 @@ async function main() {
 
   // Same guard as the sitemap: if both content tables resolve to nothing, something is broken
   // upstream and shipping an empty corpus would hide it.
-  if (tutorials.length === 0 && posts.length === 0) {
+  if (tutorials.length === 0 && posts.length === 0 && process.env.ALLOW_EMPTY_CONTENT !== '1') {
     throw new Error(
       'Both tutorials and blog_posts returned zero published rows. Refusing to write an empty ' +
         'llms.txt — check the status casing and column names against the schema.'
