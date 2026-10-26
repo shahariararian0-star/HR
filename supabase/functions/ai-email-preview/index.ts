@@ -1,4 +1,4 @@
-// OpenHRApp — AI email preview / test send
+// StaffCove — AI email preview / test send
 //
 // Super admin only. Renders a template for a real (or sample) recipient, runs
 // the configured model over the super admin's instruction, and returns the
@@ -15,8 +15,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const FROM_EMAIL = 'OpenHRApp <noreply@openhrapp.com>';
-const APP_URL = 'https://openhrapp.com';
+const FROM_EMAIL = 'StaffCove <noreply@staffcove.com>';
+const APP_URL = 'https://staffcove.com';
 
 function json(status: number, body: unknown) {
   return new Response(JSON.stringify(body), {
@@ -31,11 +31,11 @@ function render(tpl: string, vars: Record<string, string>): string {
 }
 
 const SYSTEM_PROMPT = [
-  'You write short transactional emails for OpenHRApp, an HR and attendance product.',
+  'You write short transactional emails for StaffCove, an HR and attendance product.',
   'Return ONLY a JSON object with exactly two string keys: "subject" and "body_html".',
   'body_html must use only <p>, <strong>, <em>, <a>, <ul>, <ol>, <li>, <h2>, <blockquote>. No styles, scripts, images, head or body tags.',
   'For the main action write a button: <a href="THE_URL" data-btn="teal">Short label</a>. Colours: teal, blue, green, amber, rose, slate. At most one button, and only when there is a clear single next step.',
-  'Button labels name the action, never the product: "Open your dashboard", "Add your team", "Confirm my email". Never write "Open OpenHRApp" — the brand is already in the email header, so repeating it is redundant.',
+  'Button labels name the action, never the product: "Open your dashboard", "Add your team", "Confirm my email". Never write "Open StaffCove" — the brand is already in the email header, so repeating it is redundant.',
   'Never invent features, prices, deadlines, statistics or discounts. If you are unsure whether something exists, leave it out.',
   'Never fabricate a link. Use only the URL given to you, exactly as given.',
   'Write plainly. No marketing superlatives, no exclamation marks, no pressure language.',

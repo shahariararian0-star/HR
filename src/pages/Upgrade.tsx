@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
   Heart, Clock, Monitor, ArrowLeft, ExternalLink, Upload,
-  CheckCircle2, AlertCircle, Loader2, Coffee, X
+  CheckCircle2, AlertCircle, Loader2, Wallet, X
 } from 'lucide-react';
 import { upgradeService } from '../services/upgrade.service';
+import {
+  paymentSettingsService, DEFAULT_PAYMENT_SETTINGS, isSafePaymentUrl, PaymentSettings, PaymentGatewayProvider,
+  PAYMENT_GATEWAY_PROVIDERS,
+} from '../services/paymentSettings.service';
+import { paymentGatewayService } from '../services/paymentGateway.service';
 import { useSubscription } from '../context/SubscriptionContext';
 import { DonationTier, UpgradeRequest } from '../types';
 
@@ -11,12 +16,11 @@ interface UpgradeProps {
   onBack: () => void;
 }
 
-const DONATION_TIERS: { id: DonationTier; label: string; amount: number; duration: string }[] = [
-  { id: 'TIER_3MO', label: '$5', amount: 5, duration: '3 months' },
-  { id: 'TIER_6MO', label: '$10', amount: 10, duration: '6 months' },
-  { id: 'TIER_1YR', label: '$20', amount: 20, duration: '1 year' },
-  { id: 'TIER_LIFETIME', label: '$50', amount: 50, duration: 'Lifetime' }
-];
+const GATEWAY_BUTTON_LABELS: Record<PaymentGatewayProvider, string> = {
+  stripe: 'Card',
+  paypal: 'PayPal',
+  sslcommerz: 'bKash / Nagad / Card',
+};
 
 const EXTENSION_REASONS = [
   'Still evaluating features',
@@ -46,6 +50,41 @@ const Upgrade: React.FC<UpgradeProps> = ({ onBack }) => {
   const [extensionDays, setExtensionDays] = useState(14);
   const [customReason, setCustomReason] = useState('');
 
+  // Payment settings (tiers, methods, instructions) managed by Super Admin
+  const [paymentSettings, setPaymentSettings] = useState<PaymentSettings>(DEFAULT_PAYMENT_SETTINGS);
+  const donationTiers = paymentSettings.tiers.filter(t => t.enabled);
+  const paymentMethods = paymentSettings.methods.filter(m => m.enabled);
+  const onlineGateways = PAYMENT_GATEWAY_PROVIDERS.filter(p => paymentSettings.gateways[p].enabled);
+  const [checkoutProvider, setCheckoutProvider] = useState<PaymentGatewayProvider | null>(null);
+
+  // Back from Stripe / PayPal: payment-return redirects here with ?payment=<result>
+  useEffect(() => {
+    const result = new URLSearchParams(window.location.search).get('payment');
+    if (!result) return;
+    window.history.replaceState(null, '', window.location.pathname + window.location.hash);
+    if (result === 'success') {
+      setMessage({ type: 'success', text: 'Payment successful! Your plan is now active.' });
+    } else if (result === 'pending') {
+      setMessage({ type: 'success', text: 'Payment received and still being confirmed. This page will update once it is.' });
+    } else if (result === 'cancelled') {
+      setMessage({ type: 'error', text: 'Payment cancelled. You have not been charged.' });
+    } else {
+      setMessage({ type: 'error', text: 'Payment could not be confirmed. If you were charged, contact support.' });
+    }
+    refreshSubscription();
+  }, []);
+
+  const handleOnlinePayment = async (provider: PaymentGatewayProvider) => {
+    setCheckoutProvider(provider);
+    setMessage(null);
+    try {
+      window.location.href = await paymentGatewayService.startCheckout(provider, selectedTier);
+    } catch (e: any) {
+      setMessage({ type: 'error', text: e?.message || 'Could not start payment' });
+      setCheckoutProvider(null);
+    }
+  };
+
   // Check for pending request on load
   useEffect(() => {
     const checkPending = async () => {
@@ -53,7 +92,15 @@ const Upgrade: React.FC<UpgradeProps> = ({ onBack }) => {
       setPendingRequest(pending);
     };
     checkPending();
+    paymentSettingsService.getSettings().then(setPaymentSettings);
   }, []);
+
+  // Keep the selection on a visible tier when Super Admin has hidden the default one
+  useEffect(() => {
+    if (donationTiers.length > 0 && !donationTiers.some(t => t.id === selectedTier)) {
+      setSelectedTier(donationTiers[0].id);
+    }
+  }, [paymentSettings]);
 
   const handleDonationSubmit = async () => {
     if (!donationRef.trim()) {
@@ -61,7 +108,7 @@ const Upgrade: React.FC<UpgradeProps> = ({ onBack }) => {
       return;
     }
 
-    const tier = DONATION_TIERS.find(t => t.id === selectedTier);
+    const tier = donationTiers.find(t => t.id === selectedTier);
     if (!tier) return;
 
     setIsLoading(true);
@@ -145,7 +192,7 @@ const Upgrade: React.FC<UpgradeProps> = ({ onBack }) => {
         </button>
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Upgrade Your Plan</h1>
-          <p className="text-slate-500">Choose how you'd like to continue using OpenHRApp</p>
+          <p className="text-slate-500">Choose how you'd like to continue using StaffCove</p>
         </div>
       </div>
 
@@ -184,7 +231,7 @@ const Upgrade: React.FC<UpgradeProps> = ({ onBack }) => {
           <h2 className="text-xl font-bold">Support Open Source HR</h2>
         </div>
         <p className="text-white/90">
-          OpenHRApp is free and open source. Your support helps us maintain and improve the platform for everyone.
+          StaffCove is free and open source. Your support helps us maintain and improve the platform for everyone.
         </p>
       </div>
 
@@ -230,7 +277,7 @@ const Upgrade: React.FC<UpgradeProps> = ({ onBack }) => {
 
             {/* Donation Tiers */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {DONATION_TIERS.map(tier => (
+              {donationTiers.map(tier => (
                 <button
                   key={tier.id}
                   onClick={() => setSelectedTier(tier.id)}
@@ -240,45 +287,71 @@ const Upgrade: React.FC<UpgradeProps> = ({ onBack }) => {
                       : 'border-slate-200 hover:border-primary-light'
                   }`}
                 >
-                  <div className="text-2xl font-bold text-slate-900">{tier.label}</div>
+                  <div className="text-2xl font-bold text-slate-900">{paymentSettings.currencySymbol}{tier.amount}</div>
                   <div className="text-sm text-slate-500">{tier.duration}</div>
                 </button>
               ))}
             </div>
 
-            {/* Donation Platforms */}
-            <div className="space-y-4">
-              <p className="text-sm font-medium text-slate-600">Donate via:</p>
-              <div className="flex flex-wrap gap-3">
-                <a
-                  href="https://ko-fi.com/openhr"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-5 py-3 bg-[#FF5E5B] text-white rounded-xl font-bold hover:opacity-90 transition-all"
-                >
-                  <Coffee size={20} /> Ko-fi
-                  <ExternalLink size={14} />
-                </a>
-                <a
-                  href="https://buymeacoffee.com/openhrapp"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-5 py-3 bg-[#FFDD00] text-slate-900 rounded-xl font-bold hover:opacity-90 transition-all"
-                >
-                  <Coffee size={20} /> Buy Me a Coffee
-                  <ExternalLink size={14} />
-                </a>
-                <a
-                  href="https://paypal.me/openhr"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-5 py-3 bg-[#003087] text-white rounded-xl font-bold hover:opacity-90 transition-all"
-                >
-                  PayPal
-                  <ExternalLink size={14} />
-                </a>
+            {/* Online payment — activates automatically */}
+            {onlineGateways.length > 0 && donationTiers.some(t => t.id === selectedTier) && (
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-slate-600">Pay online — your plan activates automatically:</p>
+                <div className="flex flex-wrap gap-3">
+                  {onlineGateways.map(provider => {
+                    const tier = donationTiers.find(t => t.id === selectedTier);
+                    return (
+                      <button
+                        key={provider}
+                        onClick={() => handleOnlinePayment(provider)}
+                        disabled={checkoutProvider !== null}
+                        className="flex items-center gap-2 px-5 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-hover transition-all disabled:opacity-50"
+                      >
+                        {checkoutProvider === provider ? <Loader2 size={20} className="animate-spin" /> : <Wallet size={20} />}
+                        Pay {paymentSettings.currencySymbol}{tier?.amount} with {GATEWAY_BUTTON_LABELS[provider]}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Donation Platforms */}
+            {paymentMethods.length > 0 && (
+              <div className="space-y-4">
+                <p className="text-sm font-medium text-slate-600">Donate via:</p>
+                <div className="flex flex-wrap gap-3">
+                  {paymentMethods.filter(m => isSafePaymentUrl(m.url)).map(method => (
+                    <a
+                      key={method.id}
+                      href={method.url.trim()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-5 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-hover transition-all"
+                    >
+                      <Wallet size={20} /> {method.name}
+                      <ExternalLink size={14} />
+                    </a>
+                  ))}
+                </div>
+                {paymentMethods.some(m => m.details.trim()) && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {paymentMethods.filter(m => m.details.trim()).map(method => (
+                      <div key={method.id} className="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                        <div className="text-sm font-bold text-slate-900">{method.name}</div>
+                        <div className="text-sm text-slate-600 mt-1 break-words">{method.details}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {paymentSettings.instructions.trim() && (
+              <p className="text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-xl p-4 whitespace-pre-line">
+                {paymentSettings.instructions}
+              </p>
+            )}
 
             {/* Activation Form */}
             {!showDonationForm ? (

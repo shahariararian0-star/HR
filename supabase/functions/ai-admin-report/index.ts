@@ -1,4 +1,4 @@
-// OpenHRApp — natural-language reporting for super admins
+// StaffCove — natural-language reporting for super admins
 //
 // Turns a question into a read-only query, runs it, and explains the answer.
 // Built for planning email automation: which organizations never confirmed,

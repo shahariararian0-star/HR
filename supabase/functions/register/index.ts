@@ -1,4 +1,4 @@
-// OpenHRApp — Registration Edge Function
+// StaffCove — Registration Edge Function
 // Ports: Others/pb_hooks/main.pb.js → POST /api/openhr/register
 // Deno runtime (Supabase Edge Functions)
 
@@ -22,7 +22,7 @@ const corsHeaders = {
 const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 const TURNSTILE_TIMEOUT_MS = 10000;
 const TURNSTILE_MAX_TOKEN = 2048;
-const TURNSTILE_DEFAULT_HOSTS = ['openhrapp.com', 'www.openhrapp.com'];
+const TURNSTILE_DEFAULT_HOSTS = ['staffcove.com', 'www.staffcove.com'];
 
 function callerIp(req: Request): string | null {
   return req.headers.get('cf-connecting-ip')
@@ -294,7 +294,7 @@ async function sendSuperAdminRegistrationEmail(
     return;
   }
 
-  const FROM_EMAIL = 'OpenHRApp <noreply@openhrapp.com>';
+  const FROM_EMAIL = 'StaffCove <noreply@staffcove.com>';
 
   // Filter to super admins who have an email in their profile.
   // We use profiles.email directly (backfilled by migration 0013 + handle_new_user trigger)
@@ -310,7 +310,7 @@ async function sendSuperAdminRegistrationEmail(
   const subject = `New org registered: ${orgName}`;
   const html = `
     <h2>New Organization Registration</h2>
-    <p>A new organization has registered on OpenHRApp:</p>
+    <p>A new organization has registered on StaffCove:</p>
     <table style="border-collapse:collapse;width:100%;max-width:500px">
       <tr><td style="padding:6px 12px;font-weight:bold">Organization</td><td>${orgName}</td></tr>
       <tr><td style="padding:6px 12px;font-weight:bold">Admin</td><td>${adminName}</td></tr>
@@ -319,7 +319,7 @@ async function sendSuperAdminRegistrationEmail(
       <tr><td style="padding:6px 12px;font-weight:bold">Trial Ends</td><td>${trialDateStr}</td></tr>
     </table>
     <p style="margin-top:16px">
-      <a href="https://app.openhr.app" style="color:#4f46e5">Open Super Admin Dashboard</a>
+      <a href="https://staffcove.com" style="color:#4f46e5">Open Super Admin Dashboard</a>
     </p>
   `;
 

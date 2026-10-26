@@ -3,11 +3,12 @@ import React, { useState, useEffect, useMemo } from 'react';
 import {
   Clock, MapPin, History, Search, RefreshCw, ChevronRight, ExternalLink,
   Camera, X, SortAsc, SortDesc, Users, Building, Trash2, Save,
-  Calculator, UserX
+  Calculator, UserX, Wifi, Coffee, Timer
 } from 'lucide-react';
+import { breakService, AttendanceBreak, totalBreakMinutes, formatBreakMinutes } from '../services/break.service';
 import { hrService } from '../services/hrService';
 import { Attendance, Employee, AppConfig } from '../types';
-import { consolidateAttendance, calculatePunctuality, calculateDuration } from '../utils/attendanceUtils';
+import { consolidateAttendance, calculatePunctuality, calculateDuration, calculateWorkedMinutes, formatWorkedMinutes } from '../utils/attendanceUtils';
 import HelpButton from '../components/onboarding/HelpButton';
 import { useToast } from '../context/ToastContext';
 
@@ -31,6 +32,14 @@ const LogSkeleton = () => (
   </div>
 );
 
+// Office Wi-Fi Check-in verdict per record (set by the attendance-punch edge function)
+const NETWORK_BADGES: Record<NonNullable<Attendance['networkCheck']>, { label: string; className: string }> = {
+  office_wifi: { label: 'Office Wi-Fi', className: 'bg-emerald-50 text-emerald-600' },
+  learned: { label: 'Learned', className: 'bg-blue-50 text-blue-600' },
+  exempt: { label: 'Exempt', className: 'bg-slate-100 text-slate-500' },
+  not_checked: { label: 'Not checked', className: 'bg-slate-100 text-slate-500' },
+};
+
 const AttendanceLogs: React.FC<AttendanceLogsProps> = ({ user, viewMode = 'MY', filterEmployeeId }) => {
   const { showToast } = useToast();
   const isAdmin = user.role === 'ADMIN' || user.role === 'HR';
@@ -48,9 +57,11 @@ const AttendanceLogs: React.FC<AttendanceLogsProps> = ({ user, viewMode = 'MY', 
   const [searchTerm, setSearchTerm] = useState('');
   const [employeeFilter, setEmployeeFilter] = useState('ALL');
   const [deptFilter, setDeptFilter] = useState('ALL');
+  const [networkFilter, setNetworkFilter] = useState('ALL');
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   
   const [selectedLog, setSelectedLog] = useState<Attendance | null>(null);
+  const [dayBreaks, setDayBreaks] = useState<AttendanceBreak[]>([]);
   const [editState, setEditState] = useState<Partial<Attendance>>({});
   
   // Local Override State for Calculation (Not saved to DB, just for calculating status)
@@ -133,6 +144,10 @@ const AttendanceLogs: React.FC<AttendanceLogsProps> = ({ user, viewMode = 'MY', 
 
   const handleOpenDetail = async (log: Attendance) => {
     setSelectedLog(log);
+    setDayBreaks([]);
+    breakService.getBreaksForDay(log.employeeId, log.date)
+      .then(setDayBreaks)
+      .catch(e => console.warn('[AttendanceLogs] Could not load breaks:', e));
 
     // Initialize Edit State with proper formatting
     setEditState({
@@ -243,6 +258,10 @@ const AttendanceLogs: React.FC<AttendanceLogsProps> = ({ user, viewMode = 'MY', 
           return emp?.department === deptFilter;
         });
       }
+      if (networkFilter !== 'ALL') {
+        // Records from before Office Wi-Fi Check-in existed have no verdict: count them as not checked.
+        result = result.filter(log => (log.networkCheck || 'not_checked') === networkFilter);
+      }
     }
 
     // Utilize the unified consolidation logic from utils
@@ -257,7 +276,7 @@ const AttendanceLogs: React.FC<AttendanceLogsProps> = ({ user, viewMode = 'MY', 
       const timeB = b.checkIn || "";
       return sortOrder === 'desc' ? -timeA.localeCompare(timeB) : timeA.localeCompare(timeB);
     });
-  }, [logs, searchTerm, employeeFilter, deptFilter, sortOrder, isAuditMode, employees]);
+  }, [logs, searchTerm, employeeFilter, deptFilter, networkFilter, sortOrder, isAuditMode, employees]);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
@@ -335,6 +354,19 @@ const AttendanceLogs: React.FC<AttendanceLogsProps> = ({ user, viewMode = 'MY', 
                   </select>
                 </div>
               )}
+              <div className="relative flex-1">
+                <Wifi className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                <select
+                  className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] text-sm font-bold outline-none appearance-none"
+                  value={networkFilter}
+                  onChange={(e) => setNetworkFilter(e.target.value)}
+                >
+                  <option value="ALL">All Networks</option>
+                  {Object.entries(NETWORK_BADGES).map(([value, badge]) => (
+                    <option key={value} value={value}>{badge.label}</option>
+                  ))}
+                </select>
+              </div>
             </>
           )}
 
@@ -383,6 +415,15 @@ const AttendanceLogs: React.FC<AttendanceLogsProps> = ({ user, viewMode = 'MY', 
                     }`}>
                       {log.status}
                     </span>
+                    {/* 'not_checked' (every record while the feature is OFF) stays unbadged so those orgs see no change */}
+                    {isAuditMode && log.networkCheck && log.networkCheck !== 'not_checked' && (
+                      <span
+                        title={log.clientIp ? `IP: ${log.clientIp}` : undefined}
+                        className={`px-2.5 py-1 rounded-lg text-[8px] font-semibold uppercase tracking-widest ${NETWORK_BADGES[log.networkCheck].className}`}
+                      >
+                        {NETWORK_BADGES[log.networkCheck].label}
+                      </span>
+                    )}
                   </div>
                   <div className="flex flex-col gap-1">
                     {isAuditMode && (
@@ -398,6 +439,17 @@ const AttendanceLogs: React.FC<AttendanceLogsProps> = ({ user, viewMode = 'MY', 
                         <Clock size={12} className="text-primary" />
                         <span className="text-[10px] font-semibold uppercase tracking-tight">{log.checkIn || '--:--'} — {log.checkOut || 'Active'}</span>
                       </div>
+                      {log.checkIn && log.checkIn !== '-' && (() => {
+                        const worked = calculateWorkedMinutes(log.checkIn, log.checkOut);
+                        return (
+                          <div className="flex items-center gap-1.5">
+                            <Timer size={12} className="text-emerald-500" />
+                            <span className="text-[10px] font-semibold uppercase tracking-tight text-slate-600">
+                              {worked !== null ? formatWorkedMinutes(worked) : 'In progress'}
+                            </span>
+                          </div>
+                        );
+                      })()}
                       <div className="flex items-center gap-1.5 truncate max-w-[150px]">
                         <MapPin size={12} className="text-rose-500" />
                         <span className="text-[10px] font-semibold uppercase tracking-tight truncate">{log.location?.address || 'Unknown'}</span>
@@ -563,6 +615,25 @@ const AttendanceLogs: React.FC<AttendanceLogsProps> = ({ user, viewMode = 'MY', 
                     />
                  </div>
               </div>
+
+              {dayBreaks.length > 0 && (
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-1 flex items-center gap-2">
+                    <Coffee size={12} className="text-amber-500" /> Breaks ({dayBreaks.length}) · Total {formatBreakMinutes(totalBreakMinutes(dayBreaks))}
+                  </label>
+                  <div className="p-5 bg-slate-50 border border-slate-100 rounded-2xl space-y-2">
+                    {dayBreaks.map(b => {
+                      const fmt = (iso: string) => new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                      return (
+                        <div key={b.id} className="flex items-center justify-between text-xs font-bold text-slate-700">
+                          <span>{fmt(b.startTime)} — {b.endTime ? fmt(b.endTime) : 'On break now'}</span>
+                          <span className="text-slate-400">{formatBreakMinutes(totalBreakMinutes([b]))}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-1.5">
                 <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest px-1 flex items-center gap-2">

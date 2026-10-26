@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Building2, Users, Plus, Edit, Trash2, Eye, RefreshCw, X, Save,
   TrendingUp, Clock, AlertTriangle, CheckCircle2, UserCheck, Shield,
-  CreditCard, Monitor, HardDrive, FileText, Star, Share2, BookOpen, Bell, HelpCircle, Send, ScrollText, ShieldAlert, Sparkles
+  CreditCard, Monitor, HardDrive, FileText, Star, Share2, BookOpen, Bell, HelpCircle, Send, ScrollText, ShieldAlert, Sparkles, Wallet
 } from 'lucide-react';
 import { superAdminService } from '../services/superadmin.service';
 import { upgradeService } from '../services/upgrade.service';
@@ -19,17 +19,37 @@ import PushBroadcast from '../components/superadmin/PushBroadcast';
 import AuditLog from '../components/superadmin/AuditLog';
 import OrgHygienePanel from '../components/superadmin/OrgHygiene';
 import AIEmail from '../components/superadmin/AIEmail';
+import PaymentSettings from '../components/superadmin/PaymentSettings';
 
 interface SuperAdminProps {
   user: User;
-  onNavigate: (path: string) => void;
+  onNavigate: (path: string, params?: any) => void;
+  /** Section from the sidebar / address bar (#/super-admin/<tab>) */
+  tab?: string;
 }
 
 type ViewMode = 'list' | 'create' | 'edit' | 'users';
-type TabMode = 'organizations' | 'requests' | 'hygiene' | 'audit' | 'ai-email' | 'ads' | 'storage' | 'notifications' | 'broadcast' | 'blog' | 'tutorials' | 'guides' | 'showcase' | 'social';
+type TabMode = 'organizations' | 'requests' | 'payments' | 'hygiene' | 'audit' | 'ai-email' | 'ads' | 'storage' | 'notifications' | 'broadcast' | 'blog' | 'tutorials' | 'guides' | 'showcase' | 'social';
 
-const SuperAdmin: React.FC<SuperAdminProps> = () => {
-  const [activeTab, setActiveTab] = useState<TabMode>('organizations');
+const TAB_MODES: TabMode[] = ['organizations', 'requests', 'payments', 'hygiene', 'audit', 'ai-email', 'ads', 'storage', 'notifications', 'broadcast', 'blog', 'tutorials', 'guides', 'showcase', 'social'];
+const toTabMode = (tab?: string): TabMode => (TAB_MODES.includes(tab as TabMode) ? (tab as TabMode) : 'organizations');
+
+const SuperAdmin: React.FC<SuperAdminProps> = ({ onNavigate, tab }) => {
+  const [activeTab, setActiveTab] = useState<TabMode>(() => toTabMode(tab));
+
+  // Sidebar / address bar → page
+  useEffect(() => {
+    const next = toTabMode(tab);
+    if (next !== activeTab) {
+      setActiveTab(next);
+      if (next === 'organizations') setViewMode('list');
+    }
+  }, [tab]);
+
+  // Page tab buttons → address bar (keeps the sidebar highlight in sync)
+  useEffect(() => {
+    if (activeTab !== toTabMode(tab)) onNavigate('super-admin', { tab: activeTab });
+  }, [activeTab]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [stats, setStats] = useState<PlatformStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -294,12 +314,12 @@ const SuperAdmin: React.FC<SuperAdminProps> = () => {
         </div>
       )}
 
-      {/* Main Tabs */}
-      <div className="space-y-2">
+      {/* Main Tabs — on desktop these sections are in the sidebar */}
+      <div className="space-y-2 lg:hidden">
         {/* Row 1 — Platform Management */}
         <div>
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 px-1">Platform</p>
-          <div className="grid grid-cols-4 sm:grid-cols-8 gap-1 sm:gap-2 p-1 bg-slate-100 rounded-xl">
+          <div className="grid grid-cols-4 sm:grid-cols-5 gap-1 sm:gap-2 p-1 bg-slate-100 rounded-xl">
             <button
               onClick={() => { setActiveTab('organizations'); setViewMode('list'); }}
               className={`py-3 px-1 sm:px-4 rounded-lg font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1 sm:gap-2 relative ${
@@ -320,6 +340,14 @@ const SuperAdmin: React.FC<SuperAdminProps> = () => {
                   {upgradeRequests.filter(r => r.status === 'PENDING').length}
                 </span>
               )}
+            </button>
+            <button
+              onClick={() => setActiveTab('payments')}
+              className={`py-3 px-1 sm:px-4 rounded-lg font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1 sm:gap-2 ${
+                activeTab === 'payments' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              <Wallet size={16} className="shrink-0" /> <span className="hidden sm:inline">Payments</span>
             </button>
             <button
               onClick={() => setActiveTab('hygiene')}
@@ -525,6 +553,11 @@ const SuperAdmin: React.FC<SuperAdminProps> = () => {
             </div>
           )}
         </div>
+      )}
+
+      {/* Payment Settings Tab */}
+      {activeTab === 'payments' && (
+        <PaymentSettings onMessage={setMessage} />
       )}
 
       {/* Ad Management Tab */}

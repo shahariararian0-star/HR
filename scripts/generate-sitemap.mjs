@@ -8,7 +8,7 @@
  * Runs automatically as part of `npm run build`.
  */
 
-const SITE_URL = 'https://openhrapp.com';
+const SITE_URL = 'https://staffcove.com';
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || '';
 

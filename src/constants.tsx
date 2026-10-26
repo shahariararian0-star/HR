@@ -202,7 +202,7 @@ export const TIMEZONE_OPTIONS = [
 ];
 
 export const DEFAULT_CONFIG: AppConfig = {
-  companyName: "OpenHRApp Solutions Ltd.",
+  companyName: "StaffCove Solutions Ltd.",
   timezone: "UTC",
   currency: "USD",
   dateFormat: "DD/MM/YYYY",

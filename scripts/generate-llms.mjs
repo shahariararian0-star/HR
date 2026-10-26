@@ -23,7 +23,7 @@
 import { writeFileSync } from 'node:fs';
 import { htmlToMarkdown } from './lib/html-to-markdown.mjs';
 
-const SITE_URL = 'https://openhrapp.com';
+const SITE_URL = 'https://staffcove.com';
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || '';
 
@@ -37,7 +37,7 @@ const SUPABASE_HEADERS = {
   Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
 };
 
-const SITE_SUMMARY = `OpenHRApp is free, open-source HR management software for small and mid-sized
+const SITE_SUMMARY = `StaffCove is free, open-source HR management software for small and mid-sized
 organizations. It covers attendance tracking with GPS and selfie verification, leave management,
 employee records, performance reviews, and reporting. It can be used as a hosted service or
 self-hosted with Docker. The guides below are practical HR documentation — policy templates,
@@ -143,7 +143,7 @@ async function main() {
     );
   }
 
-  const header = `# OpenHRApp\n\n> ${SITE_SUMMARY.replace(/\s*\n\s*/g, ' ').trim()}\n`;
+  const header = `# StaffCove\n\n> ${SITE_SUMMARY.replace(/\s*\n\s*/g, ' ').trim()}\n`;
 
   const index = [
     header,

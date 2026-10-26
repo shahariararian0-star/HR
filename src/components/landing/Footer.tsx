@@ -40,7 +40,7 @@ const Footer: React.FC = () => {
       title: 'Product',
       links: [
         { label: 'Features', href: '/features', onClick: (e: React.MouseEvent) => { e.preventDefault(); navigateTo('/features'); } },
-        { label: 'How It Works', href: '#how-it-works', onClick: (e: React.MouseEvent) => { e.preventDefault(); scrollTo('how-it-works'); } },
+        { label: 'Pricing', href: '#pricing', onClick: (e: React.MouseEvent) => { e.preventDefault(); scrollTo('pricing'); } },
         { label: 'FAQ', href: '#faq', onClick: (e: React.MouseEvent) => { e.preventDefault(); scrollTo('faq'); } },
         { label: 'Blog', href: '/blog', onClick: (e: React.MouseEvent) => { e.preventDefault(); navigateTo('/blog'); } },
         { label: 'Changelog', href: '/changelog', onClick: (e: React.MouseEvent) => { e.preventDefault(); navigateTo('/changelog'); } },
@@ -73,12 +73,11 @@ const Footer: React.FC = () => {
           <div className={dlFooter.brandCol}>
             <div className="flex items-center gap-2 mb-4">
               <div className={dlBrand.frameSmall}>
-                <img src="/img/logo.webp" className="w-full h-full object-contain" alt="OpenHRApp" width="44" height="44" />
+                <img src="/img/logo.webp" className="w-full h-full object-contain" alt="StaffCove" width="44" height="44" />
               </div>
               <span className={dlBrand.word}>
-                <span className={dlBrand.wordOnSlab}>Open</span>
-                <span className={dlBrand.wordAccentOnSlab}>HR</span>
-                <span className={dlBrand.wordOnSlab}>App</span>
+                <span className={dlBrand.wordOnSlab}>Staff</span>
+                <span className={dlBrand.wordAccentOnSlab}>Cove</span>
               </span>
             </div>
             <p className={dlFooter.blurb}>
@@ -110,7 +109,7 @@ const Footer: React.FC = () => {
         {/* Bottom Bar */}
         <div className={dlFooter.bottomBar}>
           <p className={dlFooter.fine}>
-            &copy; {new Date().getFullYear()} OpenHRApp. All rights reserved.
+            &copy; {new Date().getFullYear()} StaffCove. All rights reserved.
           </p>
 
           {/* Social Links */}

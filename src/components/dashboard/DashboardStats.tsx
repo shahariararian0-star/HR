@@ -11,11 +11,11 @@ interface Props {
 }
 
 const SkeletonCard = () => (
-  <div className="bg-white p-4 md:p-5 rounded-2xl md:rounded-3xl border border-slate-100 shadow-sm animate-pulse flex flex-col gap-3">
-    <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-100 rounded-xl"></div>
-    <div className="space-y-2">
+  <div className="bg-white p-4 md:p-5 rounded-2xl border border-slate-100 shadow-sm animate-pulse flex items-center gap-4">
+    <div className="w-11 h-11 md:w-12 md:h-12 bg-slate-100 rounded-full flex-shrink-0"></div>
+    <div className="space-y-2 flex-1">
+      <div className="h-2.5 bg-slate-50 rounded-lg w-1/2"></div>
       <div className="h-5 md:h-6 bg-slate-100 rounded-lg w-3/4"></div>
-      <div className="h-2 md:h-3 bg-slate-50 rounded-lg w-1/2"></div>
     </div>
   </div>
 );
@@ -23,7 +23,7 @@ const SkeletonCard = () => (
 export const DashboardStats: React.FC<Props> = ({ leaveUsed, upcomingHoliday, isLoading }) => {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 gap-3 md:gap-4">
+      <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-3 md:gap-4">
         <SkeletonCard />
         <SkeletonCard />
       </div>
@@ -31,27 +31,27 @@ export const DashboardStats: React.FC<Props> = ({ leaveUsed, upcomingHoliday, is
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3 md:gap-4">
-      <div className="bg-white p-4 md:p-5 rounded-2xl md:rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-3">
-        <div className="w-8 h-8 md:w-10 md:h-10 bg-primary-light text-primary rounded-xl flex items-center justify-center">
-          <CalendarDays size={18} className="md:w-5 md:h-5" />
+    <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-3 md:gap-4">
+      <div className="bg-white p-4 md:p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3 md:gap-4 min-w-0">
+        <div className="w-11 h-11 md:w-12 md:h-12 bg-primary-light text-primary rounded-full flex items-center justify-center flex-shrink-0">
+          <CalendarDays size={20} />
         </div>
-        <div>
-          <h3 className="text-lg md:text-xl font-semibold text-slate-900 leading-none">{leaveUsed} Days</h3>
-          <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-tight">Leave Used</p>
+        <div className="min-w-0">
+          <p className="text-xs font-medium text-slate-500 truncate">Leave Used</p>
+          <h3 className="text-xl md:text-2xl font-bold text-slate-900 leading-tight">{leaveUsed} Days</h3>
         </div>
       </div>
-      <div className="bg-white p-4 md:p-5 rounded-2xl md:rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-3">
-        <div className="w-8 h-8 md:w-10 md:h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center">
-          <Gift size={18} className="md:w-5 md:h-5" />
+      <div className="bg-white p-4 md:p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3 md:gap-4 min-w-0">
+        <div className="w-11 h-11 md:w-12 md:h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center flex-shrink-0">
+          <Gift size={20} />
         </div>
-        <div>
-          <h3 className="text-lg md:text-xl font-semibold text-slate-900 leading-none truncate">
-            {upcomingHoliday ? new Date(upcomingHoliday.date).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' }) : 'N/A'}
-          </h3>
-          <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-tight truncate">
+        <div className="min-w-0">
+          <p className="text-xs font-medium text-slate-500 truncate">
             {upcomingHoliday ? upcomingHoliday.name : 'No Holidays'}
           </p>
+          <h3 className="text-xl md:text-2xl font-bold text-slate-900 leading-tight truncate">
+            {upcomingHoliday ? new Date(upcomingHoliday.date).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' }) : 'N/A'}
+          </h3>
         </div>
       </div>
     </div>

@@ -66,7 +66,12 @@ export const announcementService = {
       .select('id')
       .single();
 
-    if (error) throw new Error('Failed to create announcement');
+    if (error) {
+      console.error('[AnnouncementService] Insert failed:', error.message);
+      throw new Error(error.code === '42501'
+        ? 'You do not have permission to post announcements.'
+        : `Failed to create announcement: ${error.message}`);
+    }
     apiClient.notify();
 
     // Notify target users (fire-and-forget)

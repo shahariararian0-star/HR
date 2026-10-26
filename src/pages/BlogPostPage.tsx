@@ -65,9 +65,9 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ slug, onBack }) => {
     if (data) {
       setPost(data);
       updatePageMeta(
-        `${data.title} | OpenHRApp Blog`,
-        data.excerpt || `Read ${data.title} on the OpenHRApp Blog.`,
-        `https://openhrapp.com/blog/${slug}`,
+        `${data.title} | StaffCove Blog`,
+        data.excerpt || `Read ${data.title} on the StaffCove Blog.`,
+        `https://staffcove.com/blog/${slug}`,
         data.coverImage || undefined
       );
       setJsonLd({
@@ -77,32 +77,32 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ slug, onBack }) => {
             '@type': 'Article',
             headline: data.title,
             description: data.excerpt || '',
-            image: data.coverImage || 'https://openhrapp.com/img/screenshot-wide.png',
+            image: data.coverImage || 'https://staffcove.com/img/screenshot-wide.png',
             datePublished: data.publishedAt || data.created,
             dateModified: data.updated || data.publishedAt || data.created,
             author: {
               '@type': 'Person',
-              name: data.authorName || 'OpenHRApp Team',
+              name: data.authorName || 'StaffCove Team',
             },
             publisher: {
               '@type': 'Organization',
-              name: 'OpenHRApp',
+              name: 'StaffCove',
               logo: {
                 '@type': 'ImageObject',
-                url: 'https://openhrapp.com/img/logo.webp',
+                url: 'https://staffcove.com/img/logo.webp',
               },
             },
             mainEntityOfPage: {
               '@type': 'WebPage',
-              '@id': `https://openhrapp.com/blog/${slug}`,
+              '@id': `https://staffcove.com/blog/${slug}`,
             },
           },
           {
             '@type': 'BreadcrumbList',
             itemListElement: [
-              { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://openhrapp.com/' },
-              { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://openhrapp.com/blog' },
-              { '@type': 'ListItem', position: 3, name: data.title, item: `https://openhrapp.com/blog/${slug}` },
+              { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://staffcove.com/' },
+              { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://staffcove.com/blog' },
+              { '@type': 'ListItem', position: 3, name: data.title, item: `https://staffcove.com/blog/${slug}` },
             ],
           },
         ],

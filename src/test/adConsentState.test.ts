@@ -77,7 +77,7 @@ const storageEvent = (
     key,
     newValue,
     oldValue,
-    url: 'https://openhrapp.com/blog',
+    url: 'https://staffcove.com/blog',
   });
 
 /**

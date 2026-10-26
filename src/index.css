@@ -22,6 +22,15 @@
   --color-primary-hover: var(--primary-hover);
   --color-primary-light: var(--primary-light);
 
+  /* App shell — logged-in app only. See the token block under Root Variables. */
+  --color-app-bg: var(--app-bg);
+  --color-app-sidebar: var(--app-sidebar);
+  --color-app-card: var(--app-card);
+  --color-app-elevated: var(--app-elevated);
+  --color-app-border: var(--app-border);
+  --color-app-text: var(--app-text);
+  --color-app-muted: var(--app-muted);
+
   /* Daylight — public surface only. See the token block below. */
   --color-dl-ground: var(--dl-ground);
   --color-dl-surface: var(--dl-surface);
@@ -69,12 +78,38 @@
 
 /* ===== Root Variables ===== */
 :root {
-  --primary: #4a6fa5;
-  --primary-hover: #3b5d8c;
-  --primary-light: #d4e4f7;
-  /* Primary at ~12% alpha. Used by the .dark .bg-primary-light rules below.
-     Previously written from JS as `${primary}20`; now static, like the rest. */
-  --primary-light-dark: #4a6fa520;
+  --primary: #1677FF;
+  --primary-hover: #0E63D8;
+  --primary-light: #E8F1FF;
+  /* Primary at ~14% alpha. Used by the .dark .bg-primary-light rules below. */
+  --primary-light-dark: rgba(50, 145, 255, 0.14);
+
+  /* App shell (logged-in app). Light values; html.dark redefines them below.
+     The dark rules further down map Tailwind's slate/white utilities onto the
+     same palette, so pages that use those utilities follow along. */
+  --app-bg: #F5F7FB;
+  --app-sidebar: #FFFFFF;
+  --app-card: #FFFFFF;
+  --app-elevated: #F8FAFC;
+  --app-border: #E6EAF0;
+  --app-text: #101828;
+  --app-muted: #667085;
+}
+
+/* Written as :root.dark (same element as html.dark) so the Daylight dark block below stays
+   the first html-dot-dark rule, which src/test/daylightTokens.test.ts locates by its text. */
+:root.dark {
+  --primary: #3291FF;
+  --primary-hover: #5AA7FF;
+  --primary-light: rgba(50, 145, 255, 0.14);
+
+  --app-bg: #080F1F;
+  --app-sidebar: #0B1426;
+  --app-card: #101D32;
+  --app-elevated: #17263D;
+  --app-border: #26354B;
+  --app-text: #F8FAFC;
+  --app-muted: #A6B4CC;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -206,7 +241,7 @@ html.dark {
 body {
   font-family: 'Inter', sans-serif;
   margin: 0;
-  background-color: #fcfdfe;
+  background-color: var(--app-bg);
   -webkit-tap-highlight-color: transparent;
   padding-bottom: env(safe-area-inset-bottom);
   -webkit-font-smoothing: antialiased;
@@ -229,67 +264,71 @@ body {
 }
 
 /* ===== DARK MODE OVERRIDES ===== */
-html.dark body { background-color: #0f172a; color: #e2e8f0; }
+/* Maps Tailwind's white/slate utilities onto the app palette (--app-* in html.dark):
+   page #080F1F, card #101D32, elevated #17263D, border #26354B. */
+html.dark body { background-color: var(--app-bg); color: #E2E8F0; }
 
 /* Backgrounds */
-.dark .bg-white { background-color: #1e293b !important; }
-.dark .bg-\[\#fcfdfe\] { background-color: #0f172a !important; }
-.dark .bg-\[\#f8fafc\] { background-color: #0f172a !important; }
-.dark .bg-slate-50 { background-color: #1e293b !important; }
-.dark .bg-slate-100 { background-color: #334155 !important; }
-.dark .bg-slate-200 { background-color: #475569 !important; }
-.dark .bg-gray-50 { background-color: #1e293b !important; }
-.dark .bg-gray-100 { background-color: #334155 !important; }
+.dark .bg-white { background-color: #101D32 !important; }
+.dark .bg-\[\#fcfdfe\] { background-color: #080F1F !important; }
+.dark .bg-\[\#f8fafc\] { background-color: #080F1F !important; }
+.dark .bg-slate-50 { background-color: #17263D !important; }
+.dark .bg-slate-100 { background-color: #1B2C45 !important; }
+.dark .bg-slate-200 { background-color: #26354B !important; }
+.dark .bg-gray-50 { background-color: #17263D !important; }
+.dark .bg-gray-100 { background-color: #1B2C45 !important; }
 
 /* Hover backgrounds */
-.dark .hover\:bg-slate-50:hover { background-color: #334155 !important; }
-.dark .hover\:bg-slate-100:hover { background-color: #475569 !important; }
-.dark .hover\:bg-slate-200:hover { background-color: #475569 !important; }
-.dark .hover\:bg-white:hover { background-color: #334155 !important; }
-.dark .hover\:bg-gray-50:hover { background-color: #334155 !important; }
-.dark .hover\:bg-gray-100:hover { background-color: #475569 !important; }
-.dark .hover\:bg-rose-50:hover { background-color: #4c1d2e !important; }
+.dark .hover\:bg-slate-50:hover { background-color: #1B2C45 !important; }
+.dark .hover\:bg-slate-100:hover { background-color: #22344F !important; }
+.dark .hover\:bg-slate-200:hover { background-color: #26354B !important; }
+.dark .hover\:bg-white:hover { background-color: #1B2C45 !important; }
+.dark .hover\:bg-gray-50:hover { background-color: #1B2C45 !important; }
+.dark .hover\:bg-gray-100:hover { background-color: #22344F !important; }
+.dark .hover\:bg-rose-50:hover { background-color: #3A1A2A !important; }
 
 /* Text */
-.dark .text-slate-900 { color: #f1f5f9 !important; }
-.dark .text-slate-800 { color: #e2e8f0 !important; }
-.dark .text-slate-700 { color: #cbd5e1 !important; }
-.dark .text-slate-600 { color: #94a3b8 !important; }
-.dark .text-slate-500 { color: #94a3b8 !important; }
-.dark .text-slate-400 { color: #64748b !important; }
-.dark .text-slate-300 { color: #475569 !important; }
-.dark .text-gray-900 { color: #f1f5f9 !important; }
-.dark .text-gray-800 { color: #e2e8f0 !important; }
-.dark .text-gray-700 { color: #cbd5e1 !important; }
-.dark .text-gray-600 { color: #94a3b8 !important; }
-.dark .text-gray-500 { color: #94a3b8 !important; }
+.dark .text-slate-900 { color: #F8FAFC !important; }
+.dark .text-slate-800 { color: #E2E8F0 !important; }
+.dark .text-slate-700 { color: #CBD5E1 !important; }
+.dark .text-slate-600 { color: #A6B4CC !important; }
+.dark .text-slate-500 { color: #A6B4CC !important; }
+.dark .text-slate-400 { color: #7D8BA3 !important; }
+.dark .text-slate-300 { color: #4F6079 !important; }
+.dark .text-gray-900 { color: #F8FAFC !important; }
+.dark .text-gray-800 { color: #E2E8F0 !important; }
+.dark .text-gray-700 { color: #CBD5E1 !important; }
+.dark .text-gray-600 { color: #A6B4CC !important; }
+.dark .text-gray-500 { color: #A6B4CC !important; }
 
 /* Borders */
-.dark .border-slate-100 { border-color: #334155 !important; }
-.dark .border-slate-200 { border-color: #475569 !important; }
-.dark .border-slate-300 { border-color: #475569 !important; }
-.dark .border-gray-100 { border-color: #334155 !important; }
-.dark .border-gray-200 { border-color: #475569 !important; }
+.dark .border-slate-50 { border-color: #1E2D44 !important; }
+.dark .border-slate-100 { border-color: #26354B !important; }
+.dark .border-slate-200 { border-color: #2E3F58 !important; }
+.dark .border-slate-300 { border-color: #3A4D69 !important; }
+.dark .border-gray-100 { border-color: #26354B !important; }
+.dark .border-gray-200 { border-color: #2E3F58 !important; }
 
 /* Dividers */
-.dark .divide-slate-100 > * + * { border-color: #334155 !important; }
-.dark .divide-slate-200 > * + * { border-color: #475569 !important; }
+.dark .divide-slate-50 > * + * { border-color: #1E2D44 !important; }
+.dark .divide-slate-100 > * + * { border-color: #26354B !important; }
+.dark .divide-slate-200 > * + * { border-color: #2E3F58 !important; }
 
 /* Rings */
-.dark .ring-slate-100 { --tw-ring-color: #334155 !important; }
-.dark .ring-slate-200 { --tw-ring-color: #475569 !important; }
+.dark .ring-slate-100 { --tw-ring-color: #26354B !important; }
+.dark .ring-slate-200 { --tw-ring-color: #2E3F58 !important; }
 
-/* Shadows */
-.dark .shadow-sm { box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.3) !important; }
-.dark .shadow-md { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.4) !important; }
-.dark .shadow-lg { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.4) !important; }
-.dark .shadow-xl { box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.4) !important; }
+/* Shadows — softer than a light-mode drop shadow; cards separate by surface colour */
+.dark .shadow-sm { box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.35) !important; }
+.dark .shadow-md { box-shadow: 0 4px 10px -2px rgb(0 0 0 / 0.45) !important; }
+.dark .shadow-lg { box-shadow: 0 10px 20px -6px rgb(0 0 0 / 0.5) !important; }
+.dark .shadow-xl { box-shadow: 0 18px 30px -10px rgb(0 0 0 / 0.55) !important; }
 
 /* Backdrop / translucent whites */
-.dark .bg-white\/95 { background-color: rgba(30, 41, 59, 0.95) !important; }
-.dark .bg-white\/90 { background-color: rgba(30, 41, 59, 0.9) !important; }
-.dark .bg-white\/80 { background-color: rgba(30, 41, 59, 0.8) !important; }
-.dark .bg-white\/20 { background-color: rgba(30, 41, 59, 0.2) !important; }
+.dark .bg-white\/95 { background-color: rgba(16, 29, 50, 0.95) !important; }
+.dark .bg-white\/90 { background-color: rgba(16, 29, 50, 0.9) !important; }
+.dark .bg-white\/80 { background-color: rgba(16, 29, 50, 0.8) !important; }
+.dark .bg-white\/20 { background-color: rgba(16, 29, 50, 0.2) !important; }
 
 /* Primary light — dark variant */
 .dark .bg-primary-light { background-color: var(--primary-light-dark) !important; }
@@ -297,29 +336,43 @@ html.dark body { background-color: #0f172a; color: #e2e8f0; }
 
 /* Form inputs */
 .dark input, .dark textarea, .dark select {
-  background-color: #1e293b !important;
-  color: #e2e8f0 !important;
-  border-color: #475569 !important;
+  background-color: #17263D !important;
+  color: #F8FAFC !important;
+  border-color: #2E3F58 !important;
 }
 .dark input::placeholder, .dark textarea::placeholder {
-  color: #64748b !important;
+  color: #7D8BA3 !important;
 }
 .dark input:focus, .dark textarea:focus, .dark select:focus {
   border-color: var(--primary) !important;
 }
+.dark option { background-color: #17263D; color: #F8FAFC; }
 
 /* Scrollbar */
 .dark ::-webkit-scrollbar { width: 8px; height: 8px; }
-.dark ::-webkit-scrollbar-track { background: #1e293b; }
-.dark ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+.dark ::-webkit-scrollbar-track { background: #0B1426; }
+.dark ::-webkit-scrollbar-thumb { background: #2E3F58; border-radius: 4px; }
 
 /* Gradient from arbitrary light colors */
-.dark .from-\[\#f8fafc\] { --tw-gradient-from: #0f172a !important; }
-.dark .from-\[\#fcfdfe\] { --tw-gradient-from: #0f172a !important; }
+.dark .from-\[\#f8fafc\] { --tw-gradient-from: #080F1F !important; }
+.dark .from-\[\#fcfdfe\] { --tw-gradient-from: #080F1F !important; }
 
 /* Footer dark bg stays dark */
-.dark .bg-slate-900 { background-color: #020617 !important; }
-.dark .border-slate-800 { border-color: #1e293b !important; }
+.dark .bg-slate-900 { background-color: #050B17 !important; }
+.dark .border-slate-800 { border-color: #17263D !important; }
+
+/* Soft status tints — keep their meaning, darken the fill so text stays readable */
+.dark .bg-emerald-50 { background-color: rgba(32, 213, 138, 0.12) !important; }
+.dark .bg-amber-50 { background-color: rgba(255, 170, 50, 0.12) !important; }
+.dark .bg-rose-50 { background-color: rgba(244, 63, 94, 0.12) !important; }
+.dark .bg-blue-50 { background-color: rgba(50, 145, 255, 0.12) !important; }
+.dark .bg-indigo-50 { background-color: rgba(99, 102, 241, 0.14) !important; }
+.dark .bg-purple-50, .dark .bg-violet-50 { background-color: rgba(163, 106, 255, 0.14) !important; }
+.dark .bg-teal-50 { background-color: rgba(45, 212, 191, 0.12) !important; }
+.dark .border-emerald-100, .dark .border-emerald-200 { border-color: rgba(32, 213, 138, 0.25) !important; }
+.dark .border-amber-100, .dark .border-amber-200 { border-color: rgba(255, 170, 50, 0.25) !important; }
+.dark .border-rose-100, .dark .border-rose-200 { border-color: rgba(244, 63, 94, 0.25) !important; }
+.dark .border-blue-100, .dark .border-indigo-100 { border-color: rgba(50, 145, 255, 0.25) !important; }
 
 /* ===== DARK MODE — PROSE / RICH CONTENT OVERRIDES ===== */
 /* prose-invert handles most elements, these cover edge cases from WYSIWYG content */
@@ -462,6 +515,55 @@ html.dark body { background-color: #0f172a; color: #e2e8f0; }
    bands carry the class. */
 .dl-bands > * + * {
   border-top: 1px solid var(--dl-hair);
+}
+
+/* ===== STAFFCOVE LANDING PALETTE ===== */
+/* The home page wears the StaffCove navy/blue brand instead of Daylight teal. The
+   dl- utilities read the --color-dl-* theme variables, so remapping those on the
+   landing wrapper re-themes every landing section (navbar and footer included)
+   without touching the blog, tutorials or any other public page. */
+.sc-landing {
+  --dl-teal: #1677FF;
+  --dl-teal-deep: #0E63D8;
+  --color-dl-ground: #F5F7FB;
+  --color-dl-surface: #FFFFFF;
+  --color-dl-surface-2: #F0F4FA;
+  --color-dl-hair: #E3E8F0;
+  --color-dl-hair-soft: #EDF1F7;
+  --color-dl-ink: #0B1426;
+  --color-dl-muted: #5B6B82;
+  --color-dl-soft: #8492A6;
+  --color-dl-teal: #1677FF;
+  --color-dl-teal-deep: #0E63D8;
+  --font-dl-display: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-dl-body: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sc-glow: rgba(22, 119, 255, 0.10);
+  font-family: var(--font-dl-body);
+}
+.dark .sc-landing {
+  --dl-teal: #4DA3FF;
+  --dl-teal-deep: #7DBBFF;
+  --color-dl-ground: #060D1B;
+  --color-dl-surface: #0E1A2E;
+  --color-dl-surface-2: #0A1424;
+  --color-dl-hair: #1E2D45;
+  --color-dl-hair-soft: #172538;
+  --color-dl-ink: #F1F5FB;
+  --color-dl-muted: #A6B4CC;
+  --color-dl-soft: #7889A3;
+  --color-dl-teal: #4DA3FF;
+  --color-dl-teal-deep: #7DBBFF;
+  --sc-glow: rgba(56, 132, 255, 0.22);
+}
+/* Brand gradient used on the primary buttons and highlighted words. */
+.sc-gradient-text {
+  background-image: linear-gradient(90deg, #1677FF 0%, #12B5CB 55%, #14C38E 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.sc-gradient-bg {
+  background-image: linear-gradient(90deg, #1677FF 0%, #12A5E0 55%, #14C38E 100%);
 }
 
 /* ===== DAYLIGHT — HERO CTA ATTENTION ===== */

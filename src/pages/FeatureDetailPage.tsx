@@ -26,19 +26,19 @@ const FeatureDetailPage: React.FC<FeatureDetailPageProps> = ({ slug, onBack, onR
       updatePageMeta(
         feature.metaTitle,
         feature.metaDescription,
-        `https://openhrapp.com/features/${feature.slug}`
+        `https://staffcove.com/features/${feature.slug}`
       );
       setJsonLd({
         '@context': 'https://schema.org',
         '@graph': [
           {
             '@type': 'SoftwareApplication',
-            name: `OpenHRApp — ${feature.title}`,
+            name: `StaffCove — ${feature.title}`,
             applicationCategory: 'BusinessApplication',
             operatingSystem: 'Web, Android, iOS',
             description: feature.metaDescription,
-            url: `https://openhrapp.com/features/${feature.slug}`,
-            image: 'https://openhrapp.com/img/screenshot-wide.png',
+            url: `https://staffcove.com/features/${feature.slug}`,
+            image: 'https://staffcove.com/img/screenshot-wide.png',
             offers: {
               '@type': 'Offer',
               price: '0',
@@ -47,16 +47,16 @@ const FeatureDetailPage: React.FC<FeatureDetailPageProps> = ({ slug, onBack, onR
             featureList: feature.sections.flatMap(s => s.bullets).join(', '),
             isPartOf: {
               '@type': 'SoftwareApplication',
-              name: 'OpenHRApp',
-              url: 'https://openhrapp.com',
+              name: 'StaffCove',
+              url: 'https://staffcove.com',
             },
           },
           {
             '@type': 'BreadcrumbList',
             itemListElement: [
-              { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://openhrapp.com/' },
-              { '@type': 'ListItem', position: 2, name: 'Features', item: 'https://openhrapp.com/features' },
-              { '@type': 'ListItem', position: 3, name: feature.title, item: `https://openhrapp.com/features/${feature.slug}` },
+              { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://staffcove.com/' },
+              { '@type': 'ListItem', position: 2, name: 'Features', item: 'https://staffcove.com/features' },
+              { '@type': 'ListItem', position: 3, name: feature.title, item: `https://staffcove.com/features/${feature.slug}` },
             ],
           },
         ],

@@ -1,4 +1,4 @@
-// OpenHRApp — Push Check-In Reminder Cron
+// StaffCove — Push Check-In Reminder Cron
 // Schedule: * * * * * (every minute)
 //
 // Sends Web Push notifications to employees who:

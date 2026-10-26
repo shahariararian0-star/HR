@@ -2,7 +2,8 @@ import React, { useEffect, Suspense } from 'react';
 import Navbar from '../components/landing/Navbar';
 import HeroSection from '../components/landing/HeroSection';
 import FeaturesSection from '../components/landing/FeaturesSection';
-import HowItWorksSection from '../components/landing/HowItWorksSection';
+import ProductPreviewSection from '../components/landing/ProductPreviewSection';
+import WhyChooseSection from '../components/landing/WhyChooseSection';
 import PricingSection from '../components/landing/PricingSection';
 import ProofSection from '../components/landing/ProofSection';
 import Footer from '../components/landing/Footer';
@@ -10,7 +11,6 @@ import { updatePageMeta, setJsonLd } from '../utils/seo';
 
 const ShowcaseSection = React.lazy(() => import('../components/landing/ShowcaseSection'));
 const FAQSection = React.lazy(() => import('../components/landing/FAQSection'));
-const RoadmapSection = React.lazy(() => import('../components/landing/RoadmapSection'));
 const CTASection = React.lazy(() => import('../components/landing/CTASection'));
 
 const SectionSkeleton = () => (
@@ -30,10 +30,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onRegisterClick
     document.documentElement.style.scrollBehavior = 'smooth';
 
     updatePageMeta(
-      'OpenHRApp — Free Open-Source HR Management Software',
-      'OpenHRApp is a free, open-source HR platform with attendance tracking, leave management, and employee directory. Get started today — no credit card required, completely free forever.',
-      'https://openhrapp.com/',
-      'https://openhrapp.com/img/screenshot-wide.png'
+      'StaffCove — Free Open-Source HR Management Software',
+      'StaffCove is a free, open-source HR platform with attendance tracking, leave management, and employee directory. Get started today — no credit card required, completely free forever.',
+      'https://staffcove.com/',
+      'https://staffcove.com/img/screenshot-wide.png'
     );
 
     setJsonLd({
@@ -41,7 +41,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onRegisterClick
       '@graph': [
         {
           '@type': 'SoftwareApplication',
-          name: 'OpenHRApp',
+          name: 'StaffCove',
           applicationCategory: 'BusinessApplication',
           operatingSystem: 'Web, Android, iOS',
           offers: {
@@ -50,26 +50,26 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onRegisterClick
             priceCurrency: 'USD',
           },
           description: 'Free, open-source HR management system with attendance tracking, leave management, employee directory, and compliance tools.',
-          url: 'https://openhrapp.com',
-          image: 'https://openhrapp.com/img/screenshot-wide.png',
+          url: 'https://staffcove.com',
+          image: 'https://staffcove.com/img/screenshot-wide.png',
         },
         {
           '@type': 'FAQPage',
           mainEntity: [
             {
               '@type': 'Question',
-              name: 'What is OpenHRApp?',
+              name: 'What is StaffCove?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'OpenHRApp is a modern, open-source HR management platform that helps organizations manage attendance, leave, and employee records in one place. It works as a Progressive Web App (PWA) on any device.',
+                text: 'StaffCove is a modern, open-source HR management platform that helps organizations manage attendance, leave, and employee records in one place. It works as a Progressive Web App (PWA) on any device.',
               },
             },
             {
               '@type': 'Question',
-              name: 'Is OpenHRApp really free?',
+              name: 'Is StaffCove really free?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Yes — completely free. OpenHRApp is open-source software with no paywalls, no user limits, and no credit card required. The app is ad-supported. If you\'d like to support the project, you can make a small donation through Buy Me a Coffee.',
+                text: 'Yes — completely free. StaffCove is open-source software with no paywalls, no user limits, and no credit card required. The app is ad-supported. If you\'d like to support the project, you can make a small donation through Buy Me a Coffee.',
               },
             },
             {
@@ -100,7 +100,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onRegisterClick
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] dark:bg-slate-950">
+    <div className="sc-landing min-h-screen bg-dl-ground">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-dl-sm focus:bg-dl-teal focus:text-dl-surface focus:font-semibold focus:shadow-dl-2"
@@ -109,27 +109,18 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLoginClick, onRegisterClick
       </a>
       <Navbar onLoginClick={onLoginClick} onRegisterClick={onRegisterClick} onLoginSuccess={onLoginSuccess} />
       <main id="main-content" className="dl-bands" data-advertising="eligible">
-        {/* Section order per plan Addendum 1, N5 (finding F-L2). The page previously ran
-            Hero -> Testimonials -> Features, putting social proof before the visitor knew what
-            the product did, and burying the Showcase — the actual screenshots, the strongest
-            evidence the thing is real — in sixth place below the fold.
-
-            Now: explain the product, show it, price it, then answer objections. The proof block
-            sits immediately after the Showcase, where evidence belongs once there is something
-            to be evidence *for*.
-
-            ContactSection is deliberately NOT here. It now lives only at /contact (N1), which is
-            the distinct page AdSense reviewers look for; duplicating the form inline gave the
-            visitor two places to submit the same thing and gave the page a second <h2> competing
-            with the CTA. The navbar and footer both link to /contact. */}
+        {/* Section order follows the StaffCove home page design: explain the product, show it,
+            say why it helps, price it, then back it up. Every claim stays verifiable — the
+            Showcase lists only organizations whose admin opted in, and ProofSection points at
+            public artefacts instead of testimonials. ContactSection lives only at /contact. */}
         <HeroSection onLoginClick={onLoginClick} onRegisterClick={onRegisterClick} onLoginSuccess={onLoginSuccess} />
+        <Suspense fallback={null}><ShowcaseSection /></Suspense>
         <FeaturesSection />
-        <HowItWorksSection />
-        <Suspense fallback={<SectionSkeleton />}><ShowcaseSection /></Suspense>
-        <ProofSection />
+        <ProductPreviewSection />
+        <WhyChooseSection />
         <Suspense fallback={<SectionSkeleton />}><PricingSection onRegisterClick={onRegisterClick} /></Suspense>
+        <ProofSection />
         <Suspense fallback={<SectionSkeleton />}><FAQSection /></Suspense>
-        <Suspense fallback={<SectionSkeleton />}><RoadmapSection /></Suspense>
         <Suspense fallback={<SectionSkeleton />}><CTASection onRegisterClick={onRegisterClick} /></Suspense>
       </main>
       <Footer />

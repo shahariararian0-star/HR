@@ -110,7 +110,7 @@ async function sendEmailToSuperAdmins(
       <h2>New ${typeLabel} Request</h2>
       <p><strong>${orgName}</strong> has submitted a ${typeLabel.toLowerCase()} request.</p>
       <p style="margin-top:16px">
-        <a href="https://app.openhr.app" style="color:#4f46e5">Open Super Admin Dashboard</a>
+        <a href="https://staffcove.com" style="color:#4f46e5">Open Super Admin Dashboard</a>
       </p>
     `;
     await supabase.functions.invoke('notify-admins-email', {
@@ -349,11 +349,14 @@ export const upgradeService = {
           orgUpdate.trial_end_date = newEnd.toISOString();
           orgUpdate.subscription_status = 'TRIAL';
         } else if (req.request_type === 'DONATION') {
+          // Manual approval has no end date; clear any lapsed online-payment end date.
           orgUpdate.subscription_status = 'ACTIVE';
           orgUpdate.trial_end_date = null;
+          orgUpdate.paid_until = null;
         } else if (req.request_type === 'AD_SUPPORTED') {
           orgUpdate.subscription_status = 'AD_SUPPORTED';
           orgUpdate.trial_end_date = null;
+          orgUpdate.paid_until = null;
         }
         if (Object.keys(orgUpdate).length > 0) {
           await supabase.from('organizations').update(orgUpdate).eq('id', req.organization_id);

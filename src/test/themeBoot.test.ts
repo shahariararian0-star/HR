@@ -5,7 +5,7 @@ import path from 'path';
 /**
  * Theme boot behaviour.
  *
- * OpenHRApp has one brand colour, defined once in src/index.css. The selectable
+ * StaffCove has one brand colour, defined once in src/index.css. The selectable
  * accent theme it used to carry — fourteen palettes, a super-admin picker, and a
  * `default_theme` row fetched from Supabase — has been removed, along with the
  * three defects that came with it: a bulk "apply to all organizations" write
@@ -23,7 +23,7 @@ const indexHtml = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const indexCss = fs.readFileSync(path.join(root, 'src/index.css'), 'utf8');
 const themeContext = fs.readFileSync(path.join(root, 'src/context/ThemeContext.tsx'), 'utf8');
 
-const BRAND = { primary: '#4a6fa5', hover: '#3b5d8c', light: '#d4e4f7' };
+const BRAND = { primary: '#1677FF', hover: '#0E63D8', light: '#E8F1FF' };
 
 describe('brand colour is defined once, in CSS', () => {
   it('sets the brand custom properties on :root', () => {

@@ -25,8 +25,10 @@ export const AnnouncementFormModal: React.FC<Props> = ({ isOpen, onClose, onSubm
   const [targetRoles, setTargetRoles] = useState<Role[]>([]);
   const [expiresAt, setExpiresAt] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
+    setSaveError(null);
     if (editingAnnouncement) {
       setTitle(editingAnnouncement.title);
       setContent(editingAnnouncement.content);
@@ -50,6 +52,7 @@ export const AnnouncementFormModal: React.FC<Props> = ({ isOpen, onClose, onSubm
     e.preventDefault();
     if (!title.trim() || !content.trim()) return;
     setIsSaving(true);
+    setSaveError(null);
     try {
       await onSubmit({
         title: title.trim(),
@@ -59,8 +62,9 @@ export const AnnouncementFormModal: React.FC<Props> = ({ isOpen, onClose, onSubm
         expiresAt: expiresAt || undefined,
       });
       onClose();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to save announcement', err);
+      setSaveError(err?.message || 'Failed to save announcement. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -174,6 +178,10 @@ export const AnnouncementFormModal: React.FC<Props> = ({ isOpen, onClose, onSubm
               className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
             />
           </div>
+
+          {saveError && (
+            <div className="p-3 bg-rose-50 border border-rose-100 rounded-xl text-sm text-rose-700">{saveError}</div>
+          )}
 
           {/* Submit */}
           <button

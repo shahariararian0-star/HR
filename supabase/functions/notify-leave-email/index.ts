@@ -1,4 +1,4 @@
-// OpenHRApp — Notify Leave Email Edge Function
+// StaffCove — Notify Leave Email Edge Function
 // Sends email notifications for leave application lifecycle events:
 //   SUBMITTED → employee confirmation + manager action-required + HR FYI
 //   MANAGER_APPROVED → employee update + HR action-required
@@ -16,8 +16,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const FROM_EMAIL = 'OpenHRApp <noreply@openhrapp.com>';
-const APP_URL = Deno.env.get('APP_URL') || 'https://openhrapp.com';
+const FROM_EMAIL = 'StaffCove <noreply@staffcove.com>';
+const APP_URL = Deno.env.get('APP_URL') || 'https://staffcove.com';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -60,7 +60,7 @@ function baseTemplate(title: string, content: string): string {
         <!-- Header -->
         <tr>
           <td style="background-color:#4f46e5;padding:24px 32px;text-align:center;">
-            <h1 style="color:#ffffff;font-size:20px;font-weight:600;margin:0;">OpenHRApp</h1>
+            <h1 style="color:#ffffff;font-size:20px;font-weight:600;margin:0;">StaffCove</h1>
           </td>
         </tr>
         <!-- Body -->
@@ -74,7 +74,7 @@ function baseTemplate(title: string, content: string): string {
         <tr>
           <td style="background-color:#f9fafb;padding:16px 32px;text-align:center;border-top:1px solid #e5e7eb;">
             <p style="color:#6b7280;font-size:12px;margin:0;">
-              This is an automated message from OpenHRApp.
+              This is an automated message from StaffCove.
               <br><a href="${APP_URL}" style="color:#4f46e5;text-decoration:none;">${APP_URL}</a>
             </p>
           </td>

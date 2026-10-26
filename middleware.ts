@@ -1,7 +1,7 @@
 /**
  * Vercel Edge Middleware — Crawler Prerender
  *
- * OpenHRApp's public site is a client-rendered SPA (src/App.tsx routes off `currentPath`
+ * StaffCove's public site is a client-rendered SPA (src/App.tsx routes off `currentPath`
  * state, no router). Crawlers that don't execute JavaScript therefore see an empty
  * shell on every URL. This middleware detects crawlers and returns server-rendered
  * HTML instead.
@@ -39,7 +39,7 @@ export const config = {
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || '';
-const SITE_URL = 'https://openhrapp.com';
+const SITE_URL = 'https://staffcove.com';
 /**
  * Social preview image.
  *
@@ -60,7 +60,7 @@ const DEFAULT_IMAGE: SocialImage = {
   type: 'image/png',
   width: 1920,
   height: 1080,
-  alt: 'OpenHRApp — free open-source HR management software',
+  alt: 'StaffCove — free open-source HR management software',
 };
 
 const MIME_BY_EXT: Record<string, string> = {
@@ -95,14 +95,14 @@ function socialImageFor(coverPath: string | null | undefined, alt?: string): Soc
   };
 }
 const DEFAULT_DESCRIPTION = 'Free, open-source HR management system with attendance tracking, leave management, employee directory, and compliance tools.';
-const PUBLISHER_NAME = 'OpenHRApp';
+const PUBLISHER_NAME = 'StaffCove';
 
 // A byline matching the site's own name is the publishing organization, not a
 // person. Anything else is treated as a named author.
-// Must keep matching the legacy spellings too: rows written before the name was
-// normalised carry bylines of "OpenHR" and "OpenHR Team", and treating those as
-// a Person emits invalid structured data.
-const AUTHOR_IS_ORGANIZATION = /^\s*OpenHR(App)?( Team)?\s*$/i;
+// Must keep matching the legacy spellings too: rows written before the rename carry
+// bylines of "OpenHR", "OpenHRApp" and "OpenHR Team", and treating those as a Person
+// emits invalid structured data.
+const AUTHOR_IS_ORGANIZATION = /^\s*(StaffCove|OpenHR(App)?)( Team)?\s*$/i;
 
 // Link-preview crawlers — metadata only.
 const SOCIAL_BOT_RE = /facebookexternalhit|LinkedInBot|Twitterbot|Slackbot-LinkExpanding|Slackbot|WhatsApp|TelegramBot|Discordbot|Pinterestbot|Embedly|Quora Link Preview|Rogerbot|Showyoubot|Outbrain|W3C_Validator/i;
@@ -115,38 +115,38 @@ const INDEX_BOT_RE = /Googlebot|Google-InspectionTool|Mediapartners-Google|AdsBo
 const SUPABASE_HEADERS = {
   'apikey': SUPABASE_ANON_KEY,
   'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-  'User-Agent': 'OpenHRApp-Prerender/2.0',
+  'User-Agent': 'StaffCove-Prerender/2.0',
 };
 
 // Static feature metadata — mirrors src/data/features.ts FEATURES array.
 // Inlined here because Edge Runtime cannot import from src/.
 const FEATURE_META: Record<string, { title: string; description: string }> = {
   'attendance-tracking': {
-    title: 'Attendance Tracking Software | OpenHRApp - Selfie & GPS Check-In',
+    title: 'Attendance Tracking Software | StaffCove - Selfie & GPS Check-In',
     description: 'Track employee attendance with selfie-based check-in, GPS verification, and real-time dashboards. Supports office and factory shift modes. Free and open-source.',
   },
   'leave-management': {
-    title: 'Leave Management System | OpenHRApp - Request, Approve & Track',
+    title: 'Leave Management System | StaffCove - Request, Approve & Track',
     description: 'Streamline leave requests, approvals, and balance tracking. Configure custom leave types with automatic calculations. Free HR leave management software.',
   },
   'performance-reviews': {
-    title: 'Performance Review Software | OpenHRApp - Structured Review Cycles',
+    title: 'Performance Review Software | StaffCove - Structured Review Cycles',
     description: 'Run structured performance reviews with self-assessment, manager evaluation, and HR finalization. Customizable competencies and rating scales. Free HRMS.',
   },
   'gps-geofencing': {
-    title: 'GPS Attendance Tracking | OpenHRApp - Location Verified Check-In',
+    title: 'GPS Attendance Tracking | StaffCove - Location Verified Check-In',
     description: 'Verify employee attendance with GPS location tracking. Ensure employees check in from approved locations. Ideal for remote teams and field workers.',
   },
   'biometric-selfie-verification': {
-    title: 'Selfie-Based Attendance | OpenHRApp - Photo Verified Check-In',
+    title: 'Selfie-Based Attendance | StaffCove - Photo Verified Check-In',
     description: 'Prevent buddy punching with selfie-based attendance verification. Photo evidence ensures authentic check-ins. No special hardware needed.',
   },
   'employee-directory': {
-    title: 'Employee Directory & HR Database | OpenHRApp - Centralized Team Management',
+    title: 'Employee Directory & HR Database | StaffCove - Centralized Team Management',
     description: 'Manage employee profiles, departments, and org structure in one place. Role-based access, bulk import, and searchable directory. Free open-source HRMS.',
   },
   'reports-analytics': {
-    title: 'HR Reports & Analytics | OpenHRApp - Data-Driven HR Decisions',
+    title: 'HR Reports & Analytics | StaffCove - Data-Driven HR Decisions',
     description: 'Generate attendance reports, leave utilization analytics, and team performance insights. Interactive charts and CSV export. Free open-source HR reporting.',
   },
 };
@@ -305,7 +305,7 @@ export function sanitizeHtml(dirty: string): string {
     // Outbound links from user-authored content get rel protection.
     if (name === 'a') {
       const href = kept.find((a) => a.startsWith('href='));
-      if (href && /https?:/i.test(href) && !href.includes('openhrapp.com')) {
+      if (href && /https?:/i.test(href) && !href.includes('staffcove.com')) {
         kept.push('rel="nofollow ugc noopener"');
       }
     }
@@ -452,7 +452,7 @@ function buildHtml(meta: PageMeta, article?: ArticleBody): string {
 <meta property="og:url" content="${u}">
 <meta property="og:title" content="${t}">
 <meta property="og:description" content="${d}">
-<meta property="og:site_name" content="OpenHRApp">
+<meta property="og:site_name" content="StaffCove">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@openhrapp">
 <meta name="twitter:title" content="${t}">
@@ -503,7 +503,7 @@ async function resolveBlogPost(slug: string, pathname: string, wantContent: bool
   const description = p.excerpt || (cleaned ? textExcerpt(cleaned) : DEFAULT_DESCRIPTION);
 
   const meta: PageMeta = {
-    title: p.title ? `${p.title} | OpenHRApp Blog` : 'OpenHRApp Blog',
+    title: p.title ? `${p.title} | StaffCove Blog` : 'StaffCove Blog',
     description,
     image,
     url: `${SITE_URL}${pathname}`,
@@ -514,7 +514,7 @@ async function resolveBlogPost(slug: string, pathname: string, wantContent: bool
     meta,
     article: {
       html: cleaned,
-      heading: p.title || 'OpenHRApp Blog',
+      heading: p.title || 'StaffCove Blog',
       author: p.author_name || undefined,
       publishedAt: p.published_at || undefined,
       category: p.category || undefined,
@@ -547,7 +547,7 @@ async function resolveTutorial(slug: string, pathname: string, wantContent: bool
   const description = p.excerpt || (cleaned ? textExcerpt(cleaned) : DEFAULT_DESCRIPTION);
 
   const meta: PageMeta = {
-    title: p.title ? `${p.title} | OpenHRApp Guides` : 'OpenHRApp Guides',
+    title: p.title ? `${p.title} | StaffCove Guides` : 'StaffCove Guides',
     description,
     image,
     url: `${SITE_URL}${pathname}`,
@@ -558,7 +558,7 @@ async function resolveTutorial(slug: string, pathname: string, wantContent: bool
     meta,
     article: {
       html: cleaned,
-      heading: p.title || 'OpenHRApp Guides',
+      heading: p.title || 'StaffCove Guides',
       author: p.author_name || undefined,
       publishedAt: p.published_at || undefined,
       category: p.category || undefined,
@@ -623,15 +623,15 @@ async function resolveContentIndex(kind: 'blog' | 'guide', pathname: string): Pr
     .join('\n');
 
   const heading = kind === 'blog'
-    ? 'OpenHRApp Blog — HR management insights and product updates'
-    : 'OpenHRApp Guides — How to use OpenHRApp';
+    ? 'StaffCove Blog — HR management insights and product updates'
+    : 'StaffCove Guides — How to use StaffCove';
   const description = kind === 'blog'
     ? 'Articles on attendance tracking, leave management, HR compliance, and running people operations with free open-source software.'
-    : 'Step-by-step guides for setting up and running OpenHRApp: attendance, leave, employees, organization structure, reports, and performance reviews.';
+    : 'Step-by-step guides for setting up and running StaffCove: attendance, leave, employees, organization structure, reports, and performance reviews.';
 
   return {
     meta: {
-      title: `${label} | OpenHRApp`,
+      title: `${label} | StaffCove`,
       description,
       image: DEFAULT_IMAGE,
       url: `${SITE_URL}${pathname}`,
@@ -657,14 +657,14 @@ function resolveFeatureIndex(pathname: string): Resolved {
 
   return {
     meta: {
-      title: 'Features | OpenHRApp — Free Open-Source HR Management Software',
+      title: 'Features | StaffCove — Free Open-Source HR Management Software',
       description: 'Attendance tracking, leave management, performance reviews, GPS geofencing, selfie verification, employee directory, and HR reporting — all free and open-source.',
       image: DEFAULT_IMAGE,
       url: `${SITE_URL}${pathname}`,
     },
     article: {
       html: `<ul class="content-index">${items}</ul>`,
-      heading: 'OpenHRApp Features',
+      heading: 'StaffCove Features',
       kind: 'index',
       breadcrumb: [
         { name: 'Home', url: SITE_URL },
@@ -682,7 +682,7 @@ function resolveHome(): Resolved {
 
   return {
     meta: {
-      title: 'OpenHRApp — Free Open-Source HR Management Software',
+      title: 'StaffCove — Free Open-Source HR Management Software',
       description,
       image: DEFAULT_IMAGE,
       url: `${SITE_URL}/`,
@@ -690,12 +690,12 @@ function resolveHome(): Resolved {
     article: {
       html: [
         `<p>${escapeHtml(description)}</p>`,
-        '<h2>What OpenHRApp does</h2>',
+        '<h2>What StaffCove does</h2>',
         `<ul>${links}</ul>`,
         '<h2>Learn more</h2>',
         '<ul><li><a href="/how-to-use">Guides</a></li><li><a href="/blog">Blog</a></li><li><a href="/features">Features</a></li></ul>',
       ].join('\n'),
-      heading: 'OpenHRApp — Free Open-Source HR Management Software',
+      heading: 'StaffCove — Free Open-Source HR Management Software',
       kind: 'index',
       breadcrumb: [{ name: 'Home', url: SITE_URL }],
     },
@@ -710,11 +710,11 @@ function resolveHome(): Resolved {
  */
 function resolveContact(): Resolved {
   const description =
-    'Get in touch with the OpenHRApp team. Email support, report a bug on GitHub, or send a message directly.';
+    'Get in touch with the StaffCove team. Email support, report a bug on GitHub, or send a message directly.';
 
   return {
     meta: {
-      title: 'Contact OpenHRApp — Support, Questions, and Feedback',
+      title: 'Contact StaffCove — Support, Questions, and Feedback',
       description,
       image: DEFAULT_IMAGE,
       url: `${SITE_URL}/contact`,
@@ -724,7 +724,7 @@ function resolveContact(): Resolved {
         `<p>${escapeHtml(description)}</p>`,
         '<h2>Ways to reach us</h2>',
         '<ul>',
-        '<li><a href="mailto:support@openhrapp.com">support@openhrapp.com</a> — account questions, billing, anything needing a reply from a person.</li>',
+        '<li><a href="mailto:support@staffcove.com">support@staffcove.com</a> — account questions, billing, anything needing a reply from a person.</li>',
         '<li><a href="https://github.com/mimnets/openhrapp/issues" rel="nofollow">GitHub Issues</a> — bug reports and feature requests.</li>',
         '<li><a href="/how-to-use">Guides</a> — step-by-step instructions for everyday tasks.</li>',
         '</ul>',

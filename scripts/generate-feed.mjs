@@ -12,7 +12,7 @@
 import fs from 'fs';
 import path from 'path';
 
-const SITE_URL = 'https://openhrapp.com';
+const SITE_URL = 'https://staffcove.com';
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || '';
 
@@ -20,9 +20,9 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   console.error('Missing required env vars: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be set.');
   process.exit(0); // Don't fail the build, just skip feed generation
 }
-const FEED_TITLE = 'OpenHR';
+const FEED_TITLE = 'StaffCove';
 const FEED_DESCRIPTION =
-  'Articles, guides, and product updates from OpenHR — the open-source HR management system.';
+  'Articles, guides, and product updates from StaffCove — the open-source HR management system.';
 
 const SUPABASE_HEADERS = {
   'apikey': SUPABASE_ANON_KEY,
@@ -184,7 +184,7 @@ async function main() {
         link: `${SITE_URL}/blog/${p.slug}`,
         description: p.excerpt || '',
         pubDate: toRfc822(p.published_at || p.created),
-        author: p.author_name || 'OpenHR Team',
+        author: p.author_name || 'StaffCove Team',
         category: 'Blog',
       },
     }));
@@ -198,7 +198,7 @@ async function main() {
         link: `${SITE_URL}/how-to-use/${t.slug}`,
         description: t.excerpt || '',
         pubDate: toRfc822(t.published_at || t.created),
-        author: t.author_name || 'OpenHR Team',
+        author: t.author_name || 'StaffCove Team',
         category: t.category ? `Guide — ${t.category}` : 'Guide',
       },
     }));
@@ -209,7 +209,7 @@ async function main() {
       link: `${SITE_URL}/features/${f.slug}`,
       description: f.description,
       pubDate: toRfc822(featuresMtime),
-      author: 'OpenHR Team',
+      author: 'StaffCove Team',
       category: 'Feature',
     },
   }));

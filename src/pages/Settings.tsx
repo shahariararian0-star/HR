@@ -61,6 +61,7 @@ const Settings: React.FC<SettingsProps> = ({ user, onBack }) => {
   const [contactInitialized, setContactInitialized] = useState(false);
 
   const isAdmin = user.role === 'ADMIN';
+  const isSuperAdmin = user.role === 'SUPER_ADMIN';
   const [myShift, setMyShift] = useState<Shift | null>(null);
   const [myTeamName, setMyTeamName] = useState<string>('No Team');
 
@@ -215,7 +216,9 @@ const Settings: React.FC<SettingsProps> = ({ user, onBack }) => {
               </div>
               <div>
                  <h3 className="text-xl font-semibold text-slate-900">{profile.name}</h3>
-                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{profile.designation} • {profile.department}</p>
+                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                   {isSuperAdmin ? 'Super Admin' : `${profile.designation} • ${profile.department}`}
+                 </p>
               </div>
             </div>
 
@@ -338,7 +341,8 @@ const Settings: React.FC<SettingsProps> = ({ user, onBack }) => {
       {/* Re-enable Setup Guide (only shown if dismissed) */}
       <ReEnableSetupGuide userRole={user.role} />
 
-      {/* Contact Support */}
+      {/* Contact Support — hidden for super admin, who is the recipient of these messages */}
+      {!isSuperAdmin && (
       <div className="max-w-3xl animate-in slide-in-from-bottom-8">
         <h3 className="text-xl font-bold text-slate-900 tracking-tight mb-6 flex items-center gap-2">
           <MessageSquare size={24} className="text-primary" /> Contact Support
@@ -424,6 +428,7 @@ const Settings: React.FC<SettingsProps> = ({ user, onBack }) => {
           </form>
         </div>
       </div>
+      )}
     </div>
   );
 };

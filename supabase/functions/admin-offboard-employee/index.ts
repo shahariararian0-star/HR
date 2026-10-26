@@ -1,4 +1,4 @@
-// OpenHRApp — Admin Offboard / Reactivate Employee Edge Function
+// StaffCove — Admin Offboard / Reactivate Employee Edge Function
 // Requires ADMIN / HR / SUPER_ADMIN caller.
 // Sets profiles.status to 'INACTIVE' (offboard) or 'ACTIVE' (reactivate).
 // INACTIVE accounts are blocked from logging in by auth.service.ts.

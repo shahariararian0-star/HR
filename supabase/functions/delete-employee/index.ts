@@ -1,4 +1,4 @@
-// OpenHRApp — Delete Employee Edge Function
+// StaffCove — Delete Employee Edge Function
 // Requires ADMIN / HR / SUPER_ADMIN caller.
 // Uses service role to delete the auth.users record, which cascades to profiles
 // and all FK-referenced rows (notifications, etc.).

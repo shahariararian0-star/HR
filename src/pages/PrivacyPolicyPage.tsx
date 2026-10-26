@@ -13,30 +13,30 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onBack }) => {
   useEffect(() => {
     window.scrollTo(0, 0);
     updatePageMeta(
-      'Privacy Policy — OpenHRApp',
-      'Learn how OpenHRApp collects, uses, and protects your personal data. Read our full privacy policy covering cookies, data retention, and your rights.',
-      'https://openhrapp.com/privacy'
+      'Privacy Policy — StaffCove',
+      'Learn how StaffCove collects, uses, and protects your personal data. Read our full privacy policy covering cookies, data retention, and your rights.',
+      'https://staffcove.com/privacy'
     );
     setJsonLd({
       '@context': 'https://schema.org',
       '@graph': [
         {
           '@type': 'WebPage',
-          name: 'Privacy Policy — OpenHRApp',
-          description: 'Learn how OpenHRApp collects, uses, and protects your personal data. Read our full privacy policy covering cookies, data retention, and your rights.',
-          url: 'https://openhrapp.com/privacy',
+          name: 'Privacy Policy — StaffCove',
+          description: 'Learn how StaffCove collects, uses, and protects your personal data. Read our full privacy policy covering cookies, data retention, and your rights.',
+          url: 'https://staffcove.com/privacy',
           lastReviewed: '2026-04-21',
           isPartOf: {
             '@type': 'WebSite',
-            name: 'OpenHRApp',
-            url: 'https://openhrapp.com',
+            name: 'StaffCove',
+            url: 'https://staffcove.com',
           },
         },
         {
           '@type': 'BreadcrumbList',
           itemListElement: [
-            { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://openhrapp.com/' },
-            { '@type': 'ListItem', position: 2, name: 'Privacy Policy', item: 'https://openhrapp.com/privacy' },
+            { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://staffcove.com/' },
+            { '@type': 'ListItem', position: 2, name: 'Privacy Policy', item: 'https://staffcove.com/privacy' },
           ],
         },
       ],
@@ -72,9 +72,9 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onBack }) => {
             <section>
               <h2 className="text-xl font-bold text-dl-ink mb-3">1. Introduction</h2>
               <p className="text-dl-muted leading-relaxed">
-                Welcome to OpenHRApp ("we", "our", "us"). We are committed to protecting your personal information and your right to privacy.
+                Welcome to StaffCove ("we", "our", "us"). We are committed to protecting your personal information and your right to privacy.
                 This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our HR management platform
-                at <strong>openhrapp.com</strong> (the "Service").
+                at <strong>staffcove.com</strong> (the "Service").
               </p>
               <p className="text-dl-muted leading-relaxed mt-3">
                 By using the Service, you agree to the collection and use of information in accordance with this policy.
@@ -175,7 +175,7 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onBack }) => {
                   policy identifies the operating entities as Propeller Ads Limited (Cyprus),
                   Propeller Ads s.r.o. (Czech Republic), and Propeller Ads Limited (Isle of
                   Man). What we send and what we cannot control are different things, so this
-                  says which is which. OpenHRApp does not deliberately include employee
+                  says which is which. StaffCove does not deliberately include employee
                   records, account names, or email addresses in the Monetag integration: the
                   code that loads the ad tag passes only the advertising zone identifier and
                   the provider's script address, and no advertising is requested at all while
@@ -241,9 +241,9 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onBack }) => {
                 If you have any questions about this Privacy Policy or our data practices, please contact us at:
               </p>
               <div className="mt-3 p-4 bg-dl-ground rounded-dl-md text-dl-muted">
-                <p><strong>OpenHRApp</strong></p>
-                <p>Email: support@openhrapp.com</p>
-                <p>Website: <a href="https://openhrapp.com" className="text-dl-teal hover:underline">openhrapp.com</a></p>
+                <p><strong>StaffCove</strong></p>
+                <p>Email: support@staffcove.com</p>
+                <p>Website: <a href="https://staffcove.com" className="text-dl-teal hover:underline">staffcove.com</a></p>
               </div>
             </section>
 

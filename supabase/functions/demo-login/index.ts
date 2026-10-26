@@ -1,4 +1,4 @@
-// OpenHRApp — Demo Login Edge Function
+// StaffCove — Demo Login Edge Function
 // Returns session tokens for a demo organization user.
 // Called by the "Try Live Demo" button on the landing page.
 //
@@ -36,7 +36,7 @@ interface DemoAccount {
 
 const ROLE_ACCOUNTS: Record<string, DemoAccount> = {
   admin: {
-    email: 'demo-admin@openhrapp.com',
+    email: 'demo-admin@staffcove.com',
     name: 'Alex Morgan',
     role: 'ADMIN',
     employeeId: 'DEMO-001',
@@ -44,7 +44,7 @@ const ROLE_ACCOUNTS: Record<string, DemoAccount> = {
     designation: 'HR Director',
   },
   manager: {
-    email: 'demo-manager@openhrapp.com',
+    email: 'demo-manager@staffcove.com',
     name: 'Jordan Chen',
     role: 'MANAGER',
     employeeId: 'DEMO-002',
@@ -52,7 +52,7 @@ const ROLE_ACCOUNTS: Record<string, DemoAccount> = {
     designation: 'Engineering Manager',
   },
   employee: {
-    email: 'demo-employee@openhrapp.com',
+    email: 'demo-employee@staffcove.com',
     name: 'Taylor Reed',
     role: 'EMPLOYEE',
     employeeId: 'DEMO-003',

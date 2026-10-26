@@ -6,7 +6,7 @@ import React, { createContext, useContext, useState, useEffect, useLayoutEffect 
  * This used to also carry a selectable accent theme: fourteen palettes, a
  * super-admin picker, and a `default_theme` row read from Supabase on an idle
  * callback, again every 60 seconds, and again on every visibilitychange. That
- * is gone — OpenHRApp has one brand colour, defined once in src/index.css.
+ * is gone — StaffCove has one brand colour, defined once in src/index.css.
  *
  * Removing it also removed three defects:
  *
@@ -27,7 +27,7 @@ export type DarkModePreference = 'light' | 'dark' | 'system';
 const DARK_MODE_KEY = 'openhr-dark-mode';
 
 /** The <meta name="theme-color"> value per mode, matching the painted surface. */
-const META_THEME_COLOR = { dark: '#0f172a', light: '#fcfdfe' } as const;
+const META_THEME_COLOR = { dark: '#080F1F', light: '#F5F7FB' } as const;
 
 /**
  * Read the saved preference synchronously, for use as initial state.

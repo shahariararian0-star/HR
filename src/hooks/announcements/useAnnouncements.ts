@@ -1,6 +1,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { hrService } from '../../services/hrService';
+import { supabase } from '../../services/supabase';
 import { Announcement, User } from '../../types';
 
 export function useAnnouncements(user: User) {
@@ -29,6 +30,24 @@ export function useAnnouncements(user: User) {
       fetchAnnouncements();
     });
     return unsub;
+  }, [fetchAnnouncements]);
+
+  // Supabase real-time subscription — shows announcements posted by other users without a
+  // page refresh. RLS limits events to the user's own organization (migration 0044).
+  useEffect(() => {
+    // Unique name per hook instance: the dashboard widget and the page can be mounted together.
+    const channel = supabase
+      .channel(`announcements-realtime-${Math.random().toString(36).slice(2)}`)
+      .on(
+        'postgres_changes' as any,
+        { event: '*', schema: 'public', table: 'announcements' },
+        () => fetchAnnouncements(),
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel as any).catch(() => {});
+    };
   }, [fetchAnnouncements]);
 
   const visibleAnnouncements = useMemo(() => {

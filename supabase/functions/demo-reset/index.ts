@@ -1,4 +1,4 @@
-// OpenHRApp — Demo Reset Cron Edge Function
+// StaffCove — Demo Reset Cron Edge Function
 // Runs daily at midnight UTC via pg_cron → net.http_post()
 // Wipes and re-seeds the demo organization with fresh sample data.
 //
@@ -31,7 +31,7 @@ function daysAgo(days: number): string {
 
 const DEMO_USERS = [
   {
-    email: 'demo-admin@openhrapp.com',
+    email: 'demo-admin@staffcove.com',
     name: 'Alex Morgan',
     role: 'ADMIN',
     employeeId: 'DEMO-001',
@@ -39,7 +39,7 @@ const DEMO_USERS = [
     designation: 'HR Director',
   },
   {
-    email: 'demo-manager@openhrapp.com',
+    email: 'demo-manager@staffcove.com',
     name: 'Jordan Chen',
     role: 'MANAGER',
     employeeId: 'DEMO-002',
@@ -47,7 +47,7 @@ const DEMO_USERS = [
     designation: 'Engineering Manager',
   },
   {
-    email: 'demo-employee@openhrapp.com',
+    email: 'demo-employee@staffcove.com',
     name: 'Taylor Reed',
     role: 'EMPLOYEE',
     employeeId: 'DEMO-003',
@@ -304,7 +304,7 @@ Deno.serve(async (req: Request) => {
         organization_id: orgId,
         author_id: adminProfile.id,
         title: 'Welcome to Demo Corp! 👋',
-        content: 'Welcome to the OpenHRApp live demo! Explore the dashboard, check out attendance records, leave management, and employee directory. Everything you see here resets daily at midnight UTC — so feel free to experiment!',
+        content: 'Welcome to the StaffCove live demo! Explore the dashboard, check out attendance records, leave management, and employee directory. Everything you see here resets daily at midnight UTC — so feel free to experiment!',
         priority: 'NORMAL',
         created: daysAgo(2),
         updated: daysAgo(2),

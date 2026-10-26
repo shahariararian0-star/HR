@@ -9,6 +9,7 @@ import { ReconcileResult } from './workday/workdaySessionManager.types';
 import { convertToWebP } from '../utils/imageConvert';
 import { checkInSyncQueue, classifySyncError } from './attendance/syncQueue';
 import { CheckInSyncEntry } from './attendance/syncQueue.types';
+import { officeWifiService } from './officeWifi.service';
 
 const SELFIE_WEBP_QUALITY = 0.65;
 const SELFIE_MAX_DIMENSION = 720;
@@ -189,6 +190,8 @@ const mapAttendance = (r: any): Attendance => ({
   remarks: r.remarks || '',
   dutyType: r.duty_type as any,
   organizationId: r.organization_id,
+  networkCheck: r.network_check || undefined,
+  clientIp: r.client_ip || undefined,
 });
 
 export const attendanceService = {
@@ -317,27 +320,44 @@ export const attendanceService = {
 
     const payload = buildAttendancePayload(data, orgId ?? undefined);
     let createdId: string;
-    try {
-      const { data: created, error } = await supabase
-        .from('attendance')
-        .insert(payload)
-        .select('id')
-        .single();
-      if (error) throw error;
+
+    // Office Wi-Fi Check-in ON: the server checks the network and writes the row.
+    // No offline queue on this path — a replayed punch would be judged by whatever
+    // network the phone is on later, not where the employee actually was.
+    if (await officeWifiService.isEnabled()) {
+      const created = await officeWifiService.clockIn({
+        date: payload.date,
+        checkIn: payload.check_in,
+        status: payload.status,
+        remarks: payload.remarks,
+        location: data.location,
+        dutyType: payload.duty_type,
+        employeeName: payload.employee_name,
+      });
       createdId = created.id;
-    } catch (err: any) {
-      const syncErr = classifySyncError(err);
+    } else {
       try {
-        checkInSyncQueue.enqueue({
-          kind: 'CHECK_IN',
-          payload: data,
-          occurredAt: Date.now(),
-        });
-        console.warn('[AttendanceService] Check-in enqueued for later sync:', syncErr.code);
-      } catch (enqueueErr) {
-        console.error('[AttendanceService] Could not enqueue check-in:', enqueueErr);
+        const { data: created, error } = await supabase
+          .from('attendance')
+          .insert(payload)
+          .select('id')
+          .single();
+        if (error) throw error;
+        createdId = created.id;
+      } catch (err: any) {
+        const syncErr = classifySyncError(err);
+        try {
+          checkInSyncQueue.enqueue({
+            kind: 'CHECK_IN',
+            payload: data,
+            occurredAt: Date.now(),
+          });
+          console.warn('[AttendanceService] Check-in enqueued for later sync:', syncErr.code);
+        } catch (enqueueErr) {
+          console.error('[AttendanceService] Could not enqueue check-in:', enqueueErr);
+        }
+        throw err;
       }
-      throw err;
     }
     attendanceService.clearCache();
     apiClient.notify();
@@ -414,8 +434,31 @@ export const attendanceService = {
     if (remaining.length === 0) attendanceService.clearCache();
   },
 
-  async updateAttendance(id: string, data: Partial<Attendance>) {
+  // `selfPunch` marks the employee's own check-out from the attendance screen. While Office
+  // Wi-Fi Check-in is ON it goes through the attendance-punch edge function; admin edits and
+  // every call while OFF keep the direct update below.
+  async updateAttendance(
+    id: string,
+    data: Partial<Attendance>,
+    opts?: { selfPunch?: boolean; gps?: { lat: number; lng: number } | null },
+  ) {
     if (!isSupabaseConfigured()) return;
+    if (opts?.selfPunch && data.checkOut && (await officeWifiService.isEnabled())) {
+      const { data: existing } = await supabase
+        .from('attendance')
+        .select('date')
+        .eq('id', id.trim())
+        .single();
+      await officeWifiService.clockOut({
+        attendanceId: id.trim(),
+        checkOut: hhmmToISO(data.checkOut, data.date || existing?.date),
+        remarks: data.remarks,
+        gps: opts.gps,
+      });
+      attendanceService.clearCache();
+      apiClient.notify();
+      return;
+    }
     // Resolve target date for time→timestamp conversion: explicit data.date, then existing row.
     let targetDate = data.date;
     if (!targetDate && (data.checkIn || data.checkOut)) {

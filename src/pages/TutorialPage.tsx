@@ -41,15 +41,15 @@ const TutorialPage: React.FC<TutorialPageProps> = ({ slug, onBack }) => {
       setTutorial(tutorialData);
       setAllTutorials(allData.tutorials);
       updatePageMeta(
-        `${tutorialData.title} | OpenHRApp Guides`,
-        tutorialData.excerpt || `Learn how to ${tutorialData.title.toLowerCase()} with OpenHRApp.`,
-        `https://openhrapp.com/how-to-use/${slug}`,
+        `${tutorialData.title} | StaffCove Guides`,
+        tutorialData.excerpt || `Learn how to ${tutorialData.title.toLowerCase()} with StaffCove.`,
+        `https://staffcove.com/how-to-use/${slug}`,
         tutorialData.coverImage || undefined
       );
       // Build breadcrumb items
       const breadcrumbItems: any[] = [
-        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://openhrapp.com/' },
-        { '@type': 'ListItem', position: 2, name: 'Guides', item: 'https://openhrapp.com/how-to-use' },
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://staffcove.com/' },
+        { '@type': 'ListItem', position: 2, name: 'Guides', item: 'https://staffcove.com/how-to-use' },
       ];
       let pos = 3;
       if (tutorialData.category) {
@@ -59,30 +59,30 @@ const TutorialPage: React.FC<TutorialPageProps> = ({ slug, onBack }) => {
         ? allData.tutorials.find(t => t.id === tutorialData.parentId)
         : null;
       if (parent) {
-        breadcrumbItems.push({ '@type': 'ListItem', position: pos++, name: parent.title, item: `https://openhrapp.com/how-to-use/${parent.slug}` });
+        breadcrumbItems.push({ '@type': 'ListItem', position: pos++, name: parent.title, item: `https://staffcove.com/how-to-use/${parent.slug}` });
       }
-      breadcrumbItems.push({ '@type': 'ListItem', position: pos, name: tutorialData.title, item: `https://openhrapp.com/how-to-use/${slug}` });
+      breadcrumbItems.push({ '@type': 'ListItem', position: pos, name: tutorialData.title, item: `https://staffcove.com/how-to-use/${slug}` });
 
       const graph: any[] = [
         {
           '@type': 'Article',
           headline: tutorialData.title,
           description: tutorialData.excerpt || '',
-          image: tutorialData.coverImage || 'https://openhrapp.com/img/screenshot-wide.png',
+          image: tutorialData.coverImage || 'https://staffcove.com/img/screenshot-wide.png',
           datePublished: tutorialData.created,
           dateModified: tutorialData.updated || tutorialData.created,
           author: {
             '@type': 'Person',
-            name: tutorialData.authorName || 'OpenHRApp Team',
+            name: tutorialData.authorName || 'StaffCove Team',
           },
           publisher: {
             '@type': 'Organization',
-            name: 'OpenHRApp',
-            logo: { '@type': 'ImageObject', url: 'https://openhrapp.com/img/logo.webp' },
+            name: 'StaffCove',
+            logo: { '@type': 'ImageObject', url: 'https://staffcove.com/img/logo.webp' },
           },
           mainEntityOfPage: {
             '@type': 'WebPage',
-            '@id': `https://openhrapp.com/how-to-use/${slug}`,
+            '@id': `https://staffcove.com/how-to-use/${slug}`,
           },
         },
         {

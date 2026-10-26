@@ -49,8 +49,8 @@ const OPENAI_COMPATIBLE: Record<string, ProviderConfig> = {
     envKey: 'OPENROUTER_API_KEY',
     baseUrl: 'https://openrouter.ai/api/v1/chat/completions',
     extraHeaders: {
-      'HTTP-Referer': 'https://openhrapp.com',
-      'X-Title': 'OpenHRApp',
+      'HTTP-Referer': 'https://staffcove.com',
+      'X-Title': 'StaffCove',
     },
   },
   deepseek: {

@@ -33,7 +33,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onRegisterClick }) => {
 
   const navLinks = [
     { label: 'Features', href: '/features', type: 'page' as const },
-    { label: 'How It Works', href: '#how-it-works', type: 'hash' as const },
+    { label: 'Pricing', href: '#pricing', type: 'hash' as const },
     { label: 'FAQ', href: '#faq', type: 'hash' as const },
     { label: 'Contact', href: '/contact', type: 'page' as const },
     { label: 'Blog', href: '/blog', type: 'page' as const },
@@ -47,12 +47,11 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onRegisterClick }) => {
           {/* Logo */}
           <div className={dlBrand.trigger} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <div className={dlBrand.frame}>
-              <img src="/img/logo.webp" className="w-full h-full object-contain" alt="OpenHRApp" width="48" height="48" />
+              <img src="/img/logo.webp" className="w-full h-full object-contain" alt="StaffCove" width="48" height="48" />
             </div>
             <span className={dlBrand.word}>
-              <span className={dlBrand.wordInk}>Open</span>
-              <span className={dlBrand.wordAccent}>HR</span>
-              <span className={dlBrand.wordInk}>App</span>
+              <span className={dlBrand.wordInk}>Staff</span>
+              <span className={dlBrand.wordAccent}>Cove</span>
             </span>
           </div>
 

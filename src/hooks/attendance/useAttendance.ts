@@ -3,8 +3,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { hrService } from '../../services/hrService';
 import { Attendance, AppConfig, Shift } from '../../types';
 import { useToast } from '../../context/ToastContext';
+import { isOfficeWifiRequiredError, OFFICE_WIFI_REQUIRED_MESSAGE } from '../../services/officeWifi.service';
 
-export const useAttendance = (user: any, onFinish?: () => void) => {
+export const useAttendance = (user: any, onFinish?: () => void, onOfficeWifiRequired?: () => void) => {
   const { showToast } = useToast();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeRecord, setActiveRecord] = useState<Attendance | undefined>(undefined);
@@ -84,7 +85,7 @@ export const useAttendance = (user: any, onFinish?: () => void) => {
 
       if (activeRecord && !activeRecord.checkOut) {
         // Clock Out
-        await hrService.updateAttendance(activeRecord.id, { checkOut: punchTime, remarks });
+        await hrService.updateAttendance(activeRecord.id, { checkOut: punchTime, remarks }, { selfPunch: true, gps: location });
       } else {
         // Clock In
         let punchStatus: Attendance['status'] = 'PRESENT';
@@ -131,6 +132,11 @@ export const useAttendance = (user: any, onFinish?: () => void) => {
     } catch (err) {
       console.error(err);
       setStatus('idle');
+      if (isOfficeWifiRequiredError(err)) {
+        showToast(OFFICE_WIFI_REQUIRED_MESSAGE, "warning");
+        onOfficeWifiRequired?.();
+        return;
+      }
       showToast("Failed to submit attendance. Please try again.", "error");
     }
   };

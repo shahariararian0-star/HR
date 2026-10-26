@@ -195,8 +195,18 @@ export const superAdminService = {
         update.trial_end_date = data.trialEndDate || null;
       }
 
+      // A paid plan's end date (online payments) only means something while ACTIVE. Leaving ACTIVE
+      // clears it; manually re-activating after it lapsed clears it too, otherwise the nightly
+      // expiry would undo the change. An ACTIVE org whose paid plan is still running keeps it.
+      if (data.subscriptionStatus !== undefined && data.subscriptionStatus !== 'ACTIVE') {
+        update.paid_until = null;
+      }
+
       const { error } = await supabase.from('organizations').update(update).eq('id', id);
       if (error) throw error;
+      if (data.subscriptionStatus === 'ACTIVE') {
+        await supabase.from('organizations').update({ paid_until: null }).eq('id', id).lt('paid_until', new Date().toISOString());
+      }
       apiClient.notify();
       return { success: true, message: 'Organization updated successfully' };
     } catch (e: any) {

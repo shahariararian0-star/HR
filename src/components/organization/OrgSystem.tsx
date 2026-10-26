@@ -9,6 +9,7 @@ import { supabase } from '../../services/supabase';
 import { convertFileToWebP } from '../../utils/imageConvert';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
+import { ALL_DUTY_TYPES, getEnabledDutyTypes, getDutyLabel } from '../../utils/dutyTypes';
 
 interface Props {
   config: AppConfig;
@@ -72,6 +73,8 @@ export const OrgSystem: React.FC<Props> = ({ config, onSave }) => {
     };
     loadOrgData();
   }, []);
+
+  const enabledDutyTypes = getEnabledDutyTypes(config);
 
   const handleChange = (key: keyof AppConfig, value: any) => {
     onSave({ ...config, [key]: value });
@@ -215,7 +218,7 @@ export const OrgSystem: React.FC<Props> = ({ config, onSave }) => {
                   <span className="min-w-0">
                     <span className="flex items-center gap-2 text-sm font-bold text-slate-900">
                       <Sparkles size={15} className="text-primary shrink-0" />
-                      Feature us on the OpenHRApp website
+                      Feature us on the StaffCove website
                     </span>
                     <span className="block mt-1.5 text-xs font-medium text-slate-500 leading-relaxed">
                       Show your organization&rsquo;s name and logo in the showcase on our homepage.
@@ -290,8 +293,33 @@ export const OrgSystem: React.FC<Props> = ({ config, onSave }) => {
 
       {/* Duty Type Labels Section */}
       <div className="bg-white p-10 rounded-xl border border-slate-100 shadow-sm space-y-8 animate-in slide-in-from-bottom-8 duration-500">
-         <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-3"><Tag size={24} className="text-primary" /> Duty Type Labels</h3>
-         <p className="text-xs text-slate-400 -mt-4">Customize the display names for your two duty types. Internal values remain unchanged.</p>
+         <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-3"><Tag size={24} className="text-primary" /> Duty Types</h3>
+         <p className="text-xs text-slate-400 -mt-4">Choose which duty types employees can check in with, and customize their display names. Internal values remain unchanged.</p>
+         <div className="space-y-2">
+            <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest px-1">Active duty types</label>
+            <div className="flex flex-wrap gap-3">
+               {ALL_DUTY_TYPES.map(type => {
+                  const isOn = enabledDutyTypes.includes(type);
+                  // At least one duty type must stay active, or nobody could check in.
+                  const isLastOn = isOn && enabledDutyTypes.length === 1;
+                  return (
+                    <label key={type} className={`flex items-center gap-3 px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl ${isLastOn ? 'opacity-70' : 'cursor-pointer'}`}>
+                       <input
+                         type="checkbox"
+                         className="w-5 h-5 accent-indigo-600 rounded-lg"
+                         checked={isOn}
+                         disabled={isLastOn}
+                         onChange={e => handleChange('enabledDutyTypes', e.target.checked
+                           ? ALL_DUTY_TYPES.filter(t => t === type || enabledDutyTypes.includes(t))
+                           : enabledDutyTypes.filter(t => t !== type))}
+                       />
+                       <span className="text-sm font-bold text-slate-700">{getDutyLabel(config, type)}</span>
+                    </label>
+                  );
+               })}
+            </div>
+            <p className="text-[10px] text-slate-400 px-1">Only active duty types appear on the dashboard and check-in screen. At least one must stay active.</p>
+         </div>
          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-1">
                <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest px-1">Duty Type 1 (e.g. Office, HQ, Remote)</label>

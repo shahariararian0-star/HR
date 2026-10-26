@@ -1,4 +1,4 @@
-// OpenHRApp — Demo Credentials Edge Function
+// StaffCove — Demo Credentials Edge Function
 // Returns demo account details (emails, names, roles) and the shared password
 // for display in the DemoLoginModal on the landing page.
 //
@@ -31,7 +31,7 @@ interface DemoAccount {
 
 const DEMO_ACCOUNTS: DemoAccount[] = [
   {
-    email: 'demo-admin@openhrapp.com',
+    email: 'demo-admin@staffcove.com',
     name: 'Alex Morgan',
     role: 'ADMIN',
     employeeId: 'DEMO-001',
@@ -39,7 +39,7 @@ const DEMO_ACCOUNTS: DemoAccount[] = [
     designation: 'HR Director',
   },
   {
-    email: 'demo-manager@openhrapp.com',
+    email: 'demo-manager@staffcove.com',
     name: 'Jordan Chen',
     role: 'MANAGER',
     employeeId: 'DEMO-002',
@@ -47,7 +47,7 @@ const DEMO_ACCOUNTS: DemoAccount[] = [
     designation: 'Engineering Manager',
   },
   {
-    email: 'demo-employee@openhrapp.com',
+    email: 'demo-employee@staffcove.com',
     name: 'Taylor Reed',
     role: 'EMPLOYEE',
     employeeId: 'DEMO-003',

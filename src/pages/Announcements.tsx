@@ -22,6 +22,8 @@ const Announcements: React.FC<Props> = ({ user }) => {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const isAdminHR = user.role === 'ADMIN' || user.role === 'HR';
+  // Matches the announcements_insert RLS policy — other roles would be rejected by the database.
+  const canPost = canWrite && ['ADMIN', 'HR', 'MANAGER'].includes(user.role);
 
   // Show all announcements for admin/HR (even expired/targeted), visible for others
   const displayAnnouncements = isAdminHR ? announcements : visibleAnnouncements;
@@ -100,7 +102,7 @@ const Announcements: React.FC<Props> = ({ user }) => {
             <p className="text-xs text-slate-400 font-medium">{sortedAnnouncements.length} announcement{sortedAnnouncements.length !== 1 ? 's' : ''}</p>
           </div>
         </div>
-        {canWrite && (
+        {canPost && (
           <button
             onClick={() => { setEditingAnnouncement(null); setShowModal(true); }}
             className="flex items-center gap-2 px-5 py-3 bg-primary text-white rounded-2xl font-semibold text-xs uppercase tracking-wider shadow-lg shadow-primary-light/50 hover:bg-primary-hover transition-all active:scale-95"
@@ -115,7 +117,7 @@ const Announcements: React.FC<Props> = ({ user }) => {
         <div className="text-center py-16">
           <Inbox size={48} className="mx-auto text-slate-200 mb-4" />
           <p className="text-slate-400 font-medium">No announcements yet</p>
-          <p className="text-xs text-slate-300 mt-1">Create one to get started</p>
+          {canPost && <p className="text-xs text-slate-300 mt-1">Create one to get started</p>}
         </div>
       ) : (
         <div className="space-y-3">

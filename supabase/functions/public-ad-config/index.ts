@@ -1,4 +1,4 @@
-// OpenHRApp — Public Ad Config Edge Function
+// StaffCove — Public Ad Config Edge Function
 // Returns ad configuration for a given slot. Public (no auth required).
 // Reads from the settings table where key = ad_config_<slot>, scoped to the
 // organization that owns the ad configuration.

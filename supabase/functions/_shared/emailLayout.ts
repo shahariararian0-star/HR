@@ -20,8 +20,8 @@ export interface EmailLayoutOptions {
   testNote?: string;
 }
 
-const BRAND = 'OpenHRApp';
-const BRAND_URL = 'https://openhrapp.com';
+const BRAND = 'StaffCove';
+const BRAND_URL = 'https://staffcove.com';
 const ACCENT = '#0e6f66';
 const INK = '#0e1e1c';
 const MUTED = '#6b807d';

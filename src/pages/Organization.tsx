@@ -13,6 +13,8 @@ import { useToast } from '../context/ToastContext';
 import { OrgStructure } from '../components/organization/OrgStructure';
 import { OrgTeams } from '../components/organization/OrgTeams';
 import { OrgPlacement } from '../components/organization/OrgPlacement';
+import { OrgOfficeWifi } from '../components/organization/OrgOfficeWifi';
+import { getEnabledDutyTypes } from '../utils/dutyTypes';
 import { OrgWorkflow } from '../components/organization/OrgWorkflow';
 import { OrgLeaves } from '../components/organization/OrgLeaves';
 import { OrgHolidays } from '../components/organization/OrgHolidays';
@@ -286,12 +288,19 @@ const Organization: React.FC<OrganizationProps> = ({ initialTab }) => {
         )}
 
         {activeTab === 'PLACEMENT' && (
-           <OrgPlacement 
-             locations={config.officeLocations || []}
-             onAdd={() => openModal('LOCATION')}
-             onEdit={(i) => openModal('LOCATION', i)}
-             onDelete={(i) => handleDelete('LOCATION', i)}
-           />
+           <div className="space-y-6">
+             <OrgPlacement
+               locations={config.officeLocations || []}
+               onAdd={() => openModal('LOCATION')}
+               onEdit={(i) => openModal('LOCATION', i)}
+               onDelete={(i) => handleDelete('LOCATION', i)}
+             />
+             <OrgOfficeWifi
+               hasOfficeLocations={(config.officeLocations || []).length > 0}
+               dutyLabels={{ OFFICE: config.dutyLabel1 || 'Office', FACTORY: config.dutyLabel2 || 'Factory' }}
+               dutyTypes={getEnabledDutyTypes(config)}
+             />
+           </div>
         )}
 
         {activeTab === 'SHIFTS' && (

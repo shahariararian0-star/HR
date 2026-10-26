@@ -1,11 +1,13 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Loader2, AlertTriangle } from 'lucide-react';
+import { Loader2, AlertTriangle, WifiOff } from 'lucide-react';
 
 // Hooks
 import { useCamera } from '../hooks/attendance/useCamera';
 import { useGeoLocation } from '../hooks/attendance/useGeoLocation';
 import { useAttendance } from '../hooks/attendance/useAttendance';
+import { useOfficeNetwork } from '../hooks/attendance/useOfficeNetwork';
+import { getEnabledDutyTypes } from '../utils/dutyTypes';
 import { useSubscription } from '../context/SubscriptionContext';
 import { useToast } from '../context/ToastContext';
 
@@ -26,9 +28,11 @@ const Attendance: React.FC<AttendanceProps> = ({ user, autoStart, onFinish }) =>
   const { showToast } = useToast();
 
   // 1. Logic Hooks
+  // Office Wi-Fi re-check is created below; a ref lets the punch handler trigger it.
+  const officeRecheckRef = useRef<() => void>(() => {});
   const {
     currentTime, activeRecord, appConfig, isLoading, status, submitPunch
-  } = useAttendance(user, onFinish);
+  } = useAttendance(user, onFinish, () => officeRecheckRef.current());
 
   const {
     videoRef, stream, error: cameraError, facingMode, isTorchOn,
@@ -52,6 +56,11 @@ const Attendance: React.FC<AttendanceProps> = ({ user, autoStart, onFinish }) =>
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const cameraInitialized = useRef(false);
 
+  // Office Wi-Fi Check-in: always allowed when the org has it OFF.
+  const officeNetwork = useOfficeNetwork(location, dutyType);
+  officeRecheckRef.current = officeNetwork.check;
+  const officeWifiBlocked = officeNetwork.enabled && !officeNetwork.allowed;
+
   // 3. Initialize hardware once when data is ready
   useEffect(() => {
     setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
@@ -70,6 +79,15 @@ const Attendance: React.FC<AttendanceProps> = ({ user, autoStart, onFinish }) =>
     if (autoStart === 'FACTORY') setDutyType('FACTORY');
     else if (activeRecord?.dutyType) setDutyType(activeRecord.dutyType);
   }, [autoStart, activeRecord?.dutyType]);
+
+  // A new check-in may only use a duty type the admin has switched on. An open session keeps
+  // its own type so it can always be checked out, even if that type was switched off since.
+  const hasOpenSession = !!activeRecord && !activeRecord.checkOut;
+  useEffect(() => {
+    if (hasOpenSession || !appConfig) return;
+    const enabled = getEnabledDutyTypes(appConfig);
+    if (!enabled.includes(dutyType)) setDutyType(enabled[0]);
+  }, [hasOpenSession, appConfig, dutyType]);
 
   // 4. Handlers
   const handleTakePhoto = async () => {
@@ -165,6 +183,22 @@ const Attendance: React.FC<AttendanceProps> = ({ user, autoStart, onFinish }) =>
         </div>
       )}
 
+      {/* Office Wi-Fi Check-in Banner */}
+      {canPunch && officeWifiBlocked && (
+        <div className="px-4 py-3 bg-amber-50 border-t border-amber-200 flex items-center gap-2 text-amber-800">
+          <WifiOff className="w-5 h-5 shrink-0" />
+          <span className="text-sm font-medium flex-1">Connect to the office Wi-Fi to check in.</span>
+          <button
+            onClick={officeNetwork.check}
+            disabled={officeNetwork.isChecking}
+            className="px-3 py-1.5 bg-white border border-amber-300 rounded-lg text-xs font-semibold hover:bg-amber-100 disabled:opacity-60 flex items-center gap-1"
+          >
+            {officeNetwork.isChecking && <Loader2 className="w-3 h-3 animate-spin" />}
+            Check again
+          </button>
+        </div>
+      )}
+
       <AttendanceActions
         dutyType={dutyType}
         dutyLabel={dutyType === 'FACTORY' ? (appConfig?.dutyLabel2 || 'Factory') : (appConfig?.dutyLabel1 || 'Office')}
@@ -173,7 +207,7 @@ const Attendance: React.FC<AttendanceProps> = ({ user, autoStart, onFinish }) =>
         onSubmit={handlePunchSubmit}
         status={status}
         activeRecord={activeRecord}
-        isDisabled={!canPunch || !location || isLocating || status !== 'idle' || !hasPhoto || (dutyType === 'FACTORY' && !remarks.trim())}
+        isDisabled={!canPunch || officeWifiBlocked || !location || isLocating || status !== 'idle' || !hasPhoto || (dutyType === 'FACTORY' && !remarks.trim())}
       />
 
       {/* Phase 2B: PWA Ad Placement - Only after successful punch */}

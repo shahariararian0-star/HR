@@ -1,7 +1,7 @@
 /**
  * Hash-based deep linking utility for authenticated routes.
  *
- * OpenHRApp uses React state-based routing (currentPath in App.tsx) with no URL
+ * StaffCove uses React state-based routing (currentPath in App.tsx) with no URL
  * representation for authenticated pages. This module adds hash-based routing
  * so that authenticated pages are shareable, bookmarkable, and support browser
  * back/forward — without a full React Router migration.
@@ -91,6 +91,10 @@ const ROUTE_TABLE: RouteEntry[] = [
   { regex: /^#\/settings\/?$/,                path: 'settings',        paramNames: [] },
   { regex: /^#\/profile\/?$/,                 path: 'profile',         paramNames: [] },
   { regex: /^#\/upgrade\/?$/,                 path: 'upgrade',         paramNames: [] },
+
+  // -- Super Admin sections (sidebar) --
+  { regex: /^#\/super-admin\/([a-z-]+)\/?$/,  path: 'super-admin',     paramNames: ['tab'] },
+  { regex: /^#\/super-admin\/?$/,             path: 'super-admin',     paramNames: [] },
 ];
 
 // ---------------------------------------------------------------------------
@@ -126,6 +130,7 @@ const REVERSE_MAP: Record<string, HashBuilder> = {
   'settings':             () => '#/settings',
   'profile':              () => '#/profile',
   'upgrade':              () => '#/upgrade',
+  'super-admin':          (p) => p?.tab ? `#/super-admin/${p.tab}` : '#/super-admin',
 };
 
 // ---------------------------------------------------------------------------
@@ -209,9 +214,10 @@ function parseHash(raw: string): DeepLinkRoute | null {
   if (hash.includes('type=recovery')) return null;
   if (hash.includes('error=')) return null;
 
-  // Match against route table (first-match wins)
+  // Match against route table (first-match wins). The patterns include the leading '#',
+  // which was stripped during normalisation above, so put it back for matching.
   for (const entry of ROUTE_TABLE) {
-    const match = hash.match(entry.regex);
+    const match = `#${hash}`.match(entry.regex);
     if (match) {
       const params: Record<string, string> = {};
       for (let i = 0; i < entry.paramNames.length; i++) {

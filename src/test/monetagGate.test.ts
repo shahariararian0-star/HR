@@ -960,7 +960,7 @@ describe('M-19 withdrawal exit destination', () => {
     withLiveDocument(() => {
       expect(terminateAdvertisingDocument({
         navigate,
-        destination: 'https://openhrapp.com/privacy',
+        destination: 'https://staffcove.com/privacy',
       })).toBe(false);
       expect(terminateAdvertisingDocument({ navigate, destination: '//example.com/privacy' })).toBe(false);
       expect(navigate).not.toHaveBeenCalled();

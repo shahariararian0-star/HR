@@ -73,7 +73,7 @@ export const ProofSection: React.FC = () => {
             Don&rsquo;t take our word for any of this
           </h2>
           <p className="text-dl-lg text-dl-muted leading-relaxed">
-            Most HR platforms ask you to trust a sales page. Because OpenHRApp is open source, you
+            Most HR platforms ask you to trust a sales page. Because StaffCove is open source, you
             don&rsquo;t have to trust ours — you can go and check. The licence, the source, the
             deployment setup and the full development history are all public, and every claim on
             this page points at the artefact that proves it.

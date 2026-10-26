@@ -25,7 +25,7 @@ interface ContactPageProps {
   onRegisterClick?: () => void;
 }
 
-const SUPPORT_EMAIL = 'support@openhrapp.com';
+const SUPPORT_EMAIL = 'support@staffcove.com';
 
 const channels = [
   {
@@ -52,28 +52,28 @@ const ContactPage: React.FC<ContactPageProps> = ({ onBack, onRegisterClick }) =>
   useEffect(() => {
     window.scrollTo(0, 0);
     updatePageMeta(
-      'Contact OpenHRApp — Support, Questions, and Feedback',
-      'Get in touch with the OpenHRApp team. Email support, report a bug on GitHub, or send a message directly — we read everything.',
-      'https://openhrapp.com/contact',
+      'Contact StaffCove — Support, Questions, and Feedback',
+      'Get in touch with the StaffCove team. Email support, report a bug on GitHub, or send a message directly — we read everything.',
+      'https://staffcove.com/contact',
     );
     setJsonLd({
       '@context': 'https://schema.org',
       '@graph': [
         {
           '@type': 'ContactPage',
-          name: 'Contact OpenHRApp',
-          description: 'Get in touch with the OpenHRApp team for support, questions, or feedback.',
-          url: 'https://openhrapp.com/contact',
+          name: 'Contact StaffCove',
+          description: 'Get in touch with the StaffCove team for support, questions, or feedback.',
+          url: 'https://staffcove.com/contact',
           isPartOf: {
             '@type': 'WebSite',
-            name: 'OpenHRApp',
-            url: 'https://openhrapp.com',
+            name: 'StaffCove',
+            url: 'https://staffcove.com',
           },
         },
         {
           '@type': 'Organization',
-          name: 'OpenHRApp',
-          url: 'https://openhrapp.com',
+          name: 'StaffCove',
+          url: 'https://staffcove.com',
           contactPoint: [
             {
               '@type': 'ContactPoint',
@@ -86,8 +86,8 @@ const ContactPage: React.FC<ContactPageProps> = ({ onBack, onRegisterClick }) =>
         {
           '@type': 'BreadcrumbList',
           itemListElement: [
-            { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://openhrapp.com/' },
-            { '@type': 'ListItem', position: 2, name: 'Contact', item: 'https://openhrapp.com/contact' },
+            { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://staffcove.com/' },
+            { '@type': 'ListItem', position: 2, name: 'Contact', item: 'https://staffcove.com/contact' },
           ],
         },
       ],
@@ -121,7 +121,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ onBack, onRegisterClick }) =>
             Get in touch
           </h1>
           <p className="text-lg text-dl-muted leading-relaxed">
-            Questions about setting OpenHRApp up, something behaving oddly, or an idea for what it
+            Questions about setting StaffCove up, something behaving oddly, or an idea for what it
             should do next — all of it is welcome. Messages go to a real inbox and we read every one.
           </p>
         </header>

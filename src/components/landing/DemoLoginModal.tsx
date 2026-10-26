@@ -40,15 +40,14 @@ const BrandLogo = () => (
         <img
           src="/img/logo.webp"
           className="w-full h-full object-contain"
-          alt="OpenHRApp Logo"
+          alt="StaffCove Logo"
         />
       </div>
     </div>
     <div className="text-center">
       <h2 className="text-xl font-semibold tracking-tighter flex items-center justify-center">
-        <span className="text-primary">Open</span>
-        <span className="text-[#f59e0b]">HR</span>
-        <span className="text-[#10b981]">App</span>
+        <span className="text-primary">Staff</span>
+        <span className="text-[#f59e0b]">Cove</span>
       </h2>
       <p className="text-slate-400 font-bold text-[9px] uppercase tracking-[0.2em] mt-0.5">Personnel Gateway</p>
     </div>
@@ -222,7 +221,7 @@ const DemoLoginModal: React.FC<DemoLoginModalProps> = ({ isOpen, onClose, onOpen
         <div className="px-5 mb-4 text-center">
           <h3 className="text-sm font-bold text-slate-800">Choose a Demo Account</h3>
           <p className="text-xs text-slate-400 mt-1">
-            Explore OpenHRApp from different role perspectives
+            Explore StaffCove from different role perspectives
           </p>
         </div>
 

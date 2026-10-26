@@ -1,8 +1,8 @@
 
 {
   "id": "openhrapp",
-  "name": "OpenHRApp",
-  "short_name": "OpenHRApp",
+  "name": "StaffCove",
+  "short_name": "StaffCove",
   "description": "Smart Open-Source HR Management System",
   "start_url": "/",
   "scope": "/",

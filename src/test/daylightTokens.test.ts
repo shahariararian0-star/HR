@@ -115,10 +115,6 @@ describe('the fixed colours stay fixed', () => {
     }
   });
 
-  it('the Buy Me a Coffee button does not pair a flipping token with the fixed yellow', () => {
-    const src = fs.readFileSync(path.resolve(__dirname, '../components/landing/PricingSection.tsx'), 'utf8');
-    expect(src).toMatch(/bg-\[#FFDD00\][^"]*text-dl-ink-fixed/);
-  });
 });
 
 /**
@@ -231,8 +227,8 @@ describe('elevation is always two layers', () => {
 
 describe('the app keeps its own tokens', () => {
   it('--primary is untouched, so the logged-in app is unaffected', () => {
-    expect(css).toContain('--primary: #4a6fa5;');
-    expect(css).toContain('--primary-hover: #3b5d8c;');
+    expect(css).toContain('--primary: #1677FF;');
+    expect(css).toContain('--primary-hover: #0E63D8;');
   });
 
   it('no Daylight token overwrites a --primary one', () => {

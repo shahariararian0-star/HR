@@ -1,4 +1,4 @@
-// OpenHRApp — Super Admin Push Broadcast
+// StaffCove — Super Admin Push Broadcast
 // Endpoint: POST /functions/v1/admin-send-push
 //
 // Body: { title, body, url?, icon?, targetType: 'ALL'|'ORG'|'ROLE'|'USER',

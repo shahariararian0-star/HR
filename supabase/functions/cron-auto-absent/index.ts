@@ -1,4 +1,4 @@
-// OpenHRApp — Auto Absent Check Cron
+// StaffCove — Auto Absent Check Cron
 // Schedule: * * * * * (every minute)
 //
 // For each org with autoAbsentEnabled in app_config:

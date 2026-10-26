@@ -80,6 +80,29 @@ export const calculateDuration = (start: string, end: string): string => {
 };
 
 /**
+ * Minutes worked between check-in and check-out (both "HH:mm"). A check-out earlier than the
+ * check-in is a night shift that ended after midnight. Returns null when either time is missing.
+ */
+export const calculateWorkedMinutes = (checkIn?: string, checkOut?: string): number | null => {
+  const toMins = (t?: string) => {
+    if (!t || t === '-' || !/^\d{1,2}:\d{2}/.test(t)) return null;
+    const [h, m] = t.split(':').map(Number);
+    return h * 60 + m;
+  };
+  const start = toMins(checkIn);
+  const end = toMins(checkOut);
+  if (start === null || end === null) return null;
+  return end >= start ? end - start : end + 24 * 60 - start;
+};
+
+/** "8h 30m", "45m". */
+export const formatWorkedMinutes = (minutes: number): string => {
+  const h = Math.floor(minutes / 60);
+  const m = Math.round(minutes % 60);
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+};
+
+/**
  * Resolves a period preset to ISO date strings.
  * Presets: 'THIS_WEEK' | 'THIS_MONTH' | 'THIS_YEAR' | 'LAST_MONTH' | 'LAST_YEAR'
  * Returns { startDate, endDate } as YYYY-MM-DD strings.
@@ -239,9 +262,18 @@ export const calculateEmployeeSummaries = (params: {
   const halfDayMap = new Map<string, Set<string>>();
   // Track all dates that have ANY attendance record per employee (for gap analysis)
   const recordedDateMap = new Map<string, Set<string>>();
+  // Hours worked: consolidated first-in → last-out per day, days with a check-out only
+  const workedMinutesMap = new Map<string, number>();
+  const workedDaysMap = new Map<string, number>();
 
   for (const rec of consolidatedAttendance) {
     if (rec.date < startDate || rec.date > endDate) continue;
+
+    const worked = calculateWorkedMinutes(rec.checkIn, rec.checkOut);
+    if (worked !== null) {
+      workedMinutesMap.set(rec.employeeId, (workedMinutesMap.get(rec.employeeId) ?? 0) + worked);
+      workedDaysMap.set(rec.employeeId, (workedDaysMap.get(rec.employeeId) ?? 0) + 1);
+    }
 
     // Track that this employee has a record for this date
     const dateSet = recordedDateMap.get(rec.employeeId) || new Set();
@@ -390,6 +422,8 @@ export const calculateEmployeeSummaries = (params: {
       leaveDays,
       halfDays,
       attendancePercentage: Math.min(100, attendancePercentage),
+      workedMinutes: workedMinutesMap.get(emp.id) ?? 0,
+      workedDays: workedDaysMap.get(emp.id) ?? 0,
     };
   });
 

@@ -627,12 +627,13 @@ const AppContent: React.FC = () => {
   const renderContent = () => {
     // Super Admin has a dedicated dashboard
     if (isSuperAdmin && (currentPath === 'dashboard' || currentPath === 'super-admin')) {
-      return <SuperAdmin user={user} onNavigate={handleNavigate} />;
+      return <SuperAdmin user={user} onNavigate={handleNavigate} tab={navParams?.tab} />;
     }
 
     switch (currentPath) {
       case 'dashboard': return <Dashboard user={user} onNavigate={handleNavigate} />;
-      case 'super-admin': return <SuperAdmin user={user} onNavigate={handleNavigate} />;
+      // Reached only by non-super-admins (super admins are handled above); never show them this page.
+      case 'super-admin': return <Dashboard user={user} onNavigate={handleNavigate} />;
       case 'upgrade':
         if (user.role === 'ADMIN' || user.role === 'HR') {
           return <Upgrade onBack={() => handleNavigate('dashboard')} />;
@@ -683,7 +684,7 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <MainLayout currentPath={currentPath} onNavigate={handleNavigate}>
+    <MainLayout currentPath={currentPath} navParams={navParams} onNavigate={handleNavigate}>
       <Suspense fallback={suspenseFallback}>{renderContent()}</Suspense>
       {pushPrompt}
     </MainLayout>

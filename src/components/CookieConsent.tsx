@@ -45,7 +45,7 @@ function loadGoogleAnalytics() {
 }
 
 /**
- * Consent for OpenHRApp's own purposes (M-12).
+ * Consent for StaffCove's own purposes (M-12).
  *
  * Three things this component is responsible for getting right:
  *

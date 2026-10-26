@@ -1,4 +1,4 @@
-// OpenHRApp — End of the ad-free period
+// StaffCove — End of the ad-free period
 // Schedule: 0 0 * * * (daily midnight UTC)
 //
 // 1. Finds orgs where subscription_status = 'TRIAL' and trial_end_date < now() →
@@ -22,7 +22,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const FROM_EMAIL = 'OpenHRApp <noreply@openhrapp.com>';
+const FROM_EMAIL = 'StaffCove <noreply@staffcove.com>';
 
 function jsonResponse(status: number, body: unknown) {
   return new Response(JSON.stringify(body), {
@@ -133,8 +133,8 @@ Deno.serve(async (req: Request) => {
         `<h2>Your ad-free period has ended</h2>
          <p>Dear ${adm.name || 'Admin'},</p>
          <p>The first 14 days for <strong>${org.name}</strong> are up, so you will start seeing
-            ads in OpenHRApp from today.</p>
-         <p><strong>Nothing else changes.</strong> OpenHRApp is free forever — every feature
+            ads in StaffCove from today.</p>
+         <p><strong>Nothing else changes.</strong> StaffCove is free forever — every feature
             stays available, there are no employee limits, and nothing has been switched off.</p>
          <p>If you would rather not see ads, a donation removes them for your whole
             organization. Visit the Upgrade page in your account for details.</p>`,
@@ -202,7 +202,7 @@ Deno.serve(async (req: Request) => {
            <p>Dear ${adm.name || 'Admin'},</p>
            <p>The ad-free period for <strong>${org.name}</strong> ends in
               <strong>${daysLeft} ${dayLabel}</strong>, after which you will start seeing ads.</p>
-           <p><strong>You do not need to do anything.</strong> OpenHRApp stays free and every
+           <p><strong>You do not need to do anything.</strong> StaffCove stays free and every
               feature keeps working — this is not a trial that runs out.</p>
            <p>If you would prefer to stay ad-free, a donation removes ads for your whole
               organization. See the Upgrade page in your account.</p>`,
@@ -225,6 +225,23 @@ Deno.serve(async (req: Request) => {
     }
   }
 
+  // ── Paid plans that have run out (online payments, migration 0041) ──
+  //
+  // ACTIVE with paid_until in the past goes where an unpaid trial goes. ACTIVE with no
+  // paid_until (lifetime, manual approval) is never touched.
+  const { data: lapsed, error: lapsedErr } = await admin
+    .from('organizations')
+    .update({ subscription_status: 'AD_SUPPORTED', updated: now.toISOString() })
+    .eq('subscription_status', 'ACTIVE')
+    .not('paid_until', 'is', null)
+    .lt('paid_until', now.toISOString())
+    .select('id, name');
+  if (lapsedErr) console.error('[cron-expire-trials] Paid plan expiry failed:', lapsedErr.message);
+  const paidExpired = lapsed?.length ?? 0;
+  for (const org of lapsed ?? []) {
+    console.log(`[cron-expire-trials] Paid plan ended, moved to ad-supported: ${org.name} (${org.id})`);
+  }
+
   // Never truncate silently: a capped run that does not say what it skipped reads in the logs
   // exactly like a run that had nothing left to do.
   remaining = Math.max(0, (overdueCount ?? 0) - expired);
@@ -238,11 +255,12 @@ Deno.serve(async (req: Request) => {
 
   console.log(
     `[cron-expire-trials] Done. moved=${expired} reminded=${reminded} remaining=${remaining} ` +
-    `batch=${batchSize} paused=${paused}`,
+    `paidExpired=${paidExpired} batch=${batchSize} paused=${paused}`,
   );
   return jsonResponse(200, {
     success: true,
     moved: expired,
+    paidExpired,
     reminded,
     remaining,
     batchSize,

@@ -155,6 +155,9 @@ export interface Attendance {
   selfie?: string;
   dutyType?: 'OFFICE' | 'FACTORY';
   organizationId?: string;
+  /** Office Wi-Fi Check-in verdict, set only by the attendance-punch edge function */
+  networkCheck?: 'office_wifi' | 'learned' | 'exempt' | 'not_checked';
+  clientIp?: string;
 }
 
 export interface LeaveRequest {
@@ -299,6 +302,7 @@ export interface AppConfig {
   officeLocations?: OfficeLocation[];
   dutyLabel1?: string; // Display label for OFFICE duty type (default "Office")
   dutyLabel2?: string; // Display label for FACTORY duty type (default "Factory")
+  enabledDutyTypes?: ('OFFICE' | 'FACTORY')[]; // Duty types employees can pick; missing/empty = both
 }
 
 export interface RegistrationData {
@@ -440,6 +444,10 @@ export interface EmployeeAttendanceSummary {
   leaveDays: number;
   halfDays: number;
   attendancePercentage: number;
+  /** Check-in to check-out time summed over the period (days with a check-out only) */
+  workedMinutes: number;
+  /** Days that have both a check-in and a check-out */
+  workedDays: number;
 }
 
 export interface LeaveSummary {

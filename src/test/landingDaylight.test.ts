@@ -51,15 +51,17 @@ describe('AC-N5 — section order and real prose', () => {
   const landing = read('src/pages/LandingPage.tsx');
 
   it('orders sections so the product is explained before it is vouched for', () => {
-    const order = ['HeroSection', 'FeaturesSection', 'HowItWorksSection', 'ShowcaseSection', 'ProofSection', 'PricingSection', 'FAQSection', 'RoadmapSection', 'CTASection'];
+    const order = ['HeroSection', 'ShowcaseSection', 'FeaturesSection', 'ProductPreviewSection', 'WhyChooseSection', 'PricingSection', 'ProofSection', 'FAQSection', 'CTASection'];
     const positions = order.map((name) => landing.indexOf(`<${name}`));
     expect(positions.every((p) => p > -1)).toBe(true);
     expect([...positions].sort((a, b) => a - b)).toEqual(positions);
   });
 
-  it('places the proof block immediately after the showcase', () => {
-    expect(landing.indexOf('<ProofSection')).toBeGreaterThan(landing.indexOf('<ShowcaseSection'));
-    expect(landing.indexOf('<ProofSection')).toBeLessThan(landing.indexOf('<PricingSection'));
+  it('places the verifiable proof block after pricing, where the design puts social proof', () => {
+    // The StaffCove home page design puts its proof band after the plans. ProofSection
+    // fills that slot with checkable artefacts rather than testimonials (AC-N4).
+    expect(landing.indexOf('<ProofSection')).toBeGreaterThan(landing.indexOf('<PricingSection'));
+    expect(landing.indexOf('<ProofSection')).toBeLessThan(landing.indexOf('<FAQSection'));
   });
 
   it('no longer duplicates the contact form inline', () => {
@@ -88,43 +90,27 @@ describe('AC-N5 — section order and real prose', () => {
   });
 });
 
-describe('AC-DL2 / AC-DL3 — the arc is the one motif, in one place', () => {
-  it('is imported exactly once across the whole codebase', () => {
-    const importers: string[] = [];
-    const walk = (dir: string) => {
-      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-        const full = path.join(dir, entry.name);
-        if (entry.isDirectory()) walk(full);
-        else if (/\.tsx$/.test(entry.name) && /from '.*ShiftArc'/.test(read(full))) importers.push(full);
-      }
-    };
-    walk(path.resolve('src'));
-    expect(importers).toHaveLength(1);
-    expect(importers[0]).toMatch(/HeroSection\.tsx$/);
+describe('AC-DL2 / AC-DL3 — the shift arc stays retired', () => {
+  // The StaffCove home page redesign replaced the Daylight shift arc with a product
+  // picture. The dawn/noon/dusk tokens keep their reservation: nothing may consume them.
+  it('the ShiftArc component is gone and nothing imports it', () => {
+    expect(fs.existsSync(path.join(LANDING_DIR, 'ShiftArc.tsx'))).toBe(false);
   });
 
-  it('confines the dawn/noon/dusk gradient to the arc', () => {
-    // The gradient id is the grep handle AC-DL3 names.
-    const arc = read('src/components/landing/ShiftArc.tsx');
-    expect(arc).toContain('id="dl-day-arc"');
-
+  it('no file consumes the dawn/noon/dusk gradient tokens', () => {
     const offenders: string[] = [];
     const walk = (dir: string) => {
       for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
         const full = path.join(dir, entry.name);
         if (entry.isDirectory()) walk(full);
-        else if (/\.(tsx?|css)$/.test(entry.name) && !/ShiftArc\.tsx$/.test(full) && !isTestFile(full)) {
+        else if (/\.(tsx?|css)$/.test(entry.name) && !isTestFile(full)) {
           const src = read(full);
-          // index.css legitimately *defines* the tokens; nothing else may consume them.
-          if (/ShiftArc/.test(src)) continue;
-          if (/dl-day-arc/.test(src)) offenders.push(full);
+          if (/from '.*ShiftArc'/.test(src)) offenders.push(full);
           if (/(?:bg|text|fill|stroke)-dl-(?:dawn|noon|dusk)\b/.test(src)) offenders.push(full);
         }
       }
     };
     walk(path.resolve('src'));
-    // No exceptions. The hero's ambient wash was briefly dl-dusk/5; it is dl-ink/5 now
-    // precisely so this list can stay empty rather than acquire a carve-out.
     expect(offenders).toEqual([]);
   });
 });
@@ -176,13 +162,13 @@ describe('DL5 — the four content pages', () => {
 
   it.each(PAGES)('%s carries no legacy slate/primary utilities', (page) => {
     const legacy = read(page).match(
-      /(?:bg|text|border|shadow|from|to|via|ring|divide)-(?:slate|primary|white)-?[0-9/]*/g
+      /\b(?:bg|text|border|shadow|from|to|via|ring|divide)-(?:slate|primary|white)-?[0-9/]*\b/g
     );
     expect(legacy ?? []).toEqual([]);
   });
 
   it.each(PAGES)('%s hardcodes no hex colour', (page) => {
-    expect(read(page).match(/#[0-9a-fA-F]{6}/g) ?? []).toEqual([]);
+    expect(read(page).match(/#[0-9a-fA-F]{6}\b/g) ?? []).toEqual([]);
   });
 
   it('keeps the article body on prose-slate + dark:prose-invert', () => {
@@ -210,13 +196,13 @@ describe('DL6 — the features pages', () => {
 
   it.each(PAGES)('%s carries no legacy slate/primary utilities', (page) => {
     const legacy = read(page).match(
-      /(?:bg|text|border|shadow|from|to|via|ring|divide)-(?:slate|primary|white|amber|emerald)-?[0-9/]*/g
+      /\b(?:bg|text|border|shadow|from|to|via|ring|divide)-(?:slate|primary|white|amber|emerald)-?[0-9/]*\b/g
     );
     expect(legacy ?? []).toEqual([]);
   });
 
   it.each(PAGES)('%s hardcodes no hex colour', (page) => {
-    expect(read(page).match(/#[0-9a-fA-F]{6}/g) ?? []).toEqual([]);
+    expect(read(page).match(/#[0-9a-fA-F]{6}\b/g) ?? []).toEqual([]);
   });
 
   it.each(PAGES)('%s needs no dark: overrides', (page) => {
@@ -239,7 +225,7 @@ describe('DL7 — trust and policy pages', () => {
 
   it.each(PAGES)('%s carries no legacy slate/primary utilities', (page) => {
     const legacy = read(page).match(
-      /(?:bg|text|border|shadow|from|to|via|ring|divide)-(?:slate|primary|white)-?[0-9/]*/g
+      /\b(?:bg|text|border|shadow|from|to|via|ring|divide)-(?:slate|primary|white)-?[0-9/]*\b/g
     );
     expect(legacy ?? []).toEqual([]);
   });
@@ -281,7 +267,7 @@ describe('the whole public surface', () => {
     expect(PUBLIC_PAGES).toHaveLength(12);
     for (const page of PUBLIC_PAGES) {
       const legacy = read(page).match(
-        /(?:bg|text|border|shadow|from|to|via|ring|divide)-(?:slate|primary|white)-?[0-9/]*/g
+        /\b(?:bg|text|border|shadow|from|to|via|ring|divide)-(?:slate|primary|white)-?[0-9/]*\b/g
       );
       expect(legacy ?? [], `${page} still has legacy utilities`).toEqual([]);
     }
@@ -291,7 +277,7 @@ describe('the whole public surface', () => {
     // --dl-teal inverts to a light cyan in dark mode; white on it is roughly 1.7:1.
     for (const page of PUBLIC_PAGES) {
       for (const m of read(page).matchAll(/class[nN]ame[^\n]*bg-dl-teal\b[^\n]*/g)) {
-        expect(m[0], `${page}`).not.toMatch(/text-white/);
+        expect(m[0], `${page}`).not.toMatch(/\btext-white\b/);
       }
     }
   });
@@ -303,7 +289,7 @@ describe('the whole public surface', () => {
       fs.existsSync(path.resolve(p))
     );
     for (const page of appPages) {
-      expect(read(page)).not.toMatch(/(?:bg|text|border)-dl-/);
+      expect(read(page)).not.toMatch(/\b(?:bg|text|border)-dl-/);
     }
   });
 });

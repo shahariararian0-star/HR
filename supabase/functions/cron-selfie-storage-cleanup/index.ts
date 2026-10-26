@@ -1,4 +1,4 @@
-// OpenHRApp — Selfie Storage Cleanup Cron
+// StaffCove — Selfie Storage Cleanup Cron
 // Schedule: 0 2 * * * (daily 2 AM UTC)
 //
 // Deletes actual selfie files from Supabase Storage for attendance records
