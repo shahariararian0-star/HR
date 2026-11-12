@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Clock, MapPin, History, Search, RefreshCw, ChevronRight, ExternalLink,
   Camera, X, SortAsc, SortDesc, Users, Building, Trash2, Save,
@@ -11,6 +11,20 @@ import { Attendance, Employee, AppConfig } from '../types';
 import { consolidateAttendance, calculatePunctuality, calculateDuration, calculateWorkedMinutes, formatWorkedMinutes } from '../utils/attendanceUtils';
 import HelpButton from '../components/onboarding/HelpButton';
 import { useToast } from '../context/ToastContext';
+import { apiClient } from '../services/api.client';
+import { superAdminService } from '../services/superadmin.service';
+import { employeeService } from '../services/employee.service';
+import { organizationService } from '../services/organization.service';
+import { attendanceService } from '../services/attendance.service';
+import { shiftService } from '../services/shift.service';
+
+/** Clear the org-scoped caches so the next fetch reads the organization now selected. */
+const clearOrgCaches = () => {
+  employeeService.clearCache();
+  organizationService.clearCache();
+  attendanceService.clearCache();
+  shiftService.clearCache();
+};
 
 interface AttendanceLogsProps {
   user: any;
@@ -42,7 +56,9 @@ const NETWORK_BADGES: Record<NonNullable<Attendance['networkCheck']>, { label: s
 
 const AttendanceLogs: React.FC<AttendanceLogsProps> = ({ user, viewMode = 'MY', filterEmployeeId }) => {
   const { showToast } = useToast();
-  const isAdmin = user.role === 'ADMIN' || user.role === 'HR';
+  const isSuperAdmin = user.role === 'SUPER_ADMIN';
+  // Super Admin audits any organization with the same rights as that organization's Admin.
+  const isAdmin = user.role === 'ADMIN' || user.role === 'HR' || isSuperAdmin;
   const isManager = user.role === 'MANAGER';
   const isAuditMode = viewMode === 'AUDIT' && (isAdmin || isManager);
   
@@ -71,7 +87,33 @@ const AttendanceLogs: React.FC<AttendanceLogsProps> = ({ user, viewMode = 'MY', 
   const [showAbsentModal, setShowAbsentModal] = useState(false);
   const [absentForm, setAbsentForm] = useState({ employeeId: '', date: new Date().toISOString().split('T')[0], remarks: 'Absent / No Show' });
 
+  // Super Admin: the organization being audited. Services read the organization from
+  // apiClient, so the page points apiClient at the chosen one and restores the
+  // Super Admin's own organization when the page closes.
+  const [orgOptions, setOrgOptions] = useState<{ id: string; name: string }[]>([]);
+  const [auditOrgId, setAuditOrgId] = useState('');
+  const ownOrgIdRef = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (!isSuperAdmin || !isAuditMode) return;
+    ownOrgIdRef.current = apiClient.getOrganizationId();
+    superAdminService.getAllOrganizations()
+      .then(orgs => setOrgOptions(
+        orgs.map(o => ({ id: o.id, name: o.name })).sort((a, b) => a.name.localeCompare(b.name))
+      ))
+      .catch(e => console.error('[AttendanceLogs] Could not load organizations', e));
+    return () => {
+      apiClient.setOrganizationId(ownOrgIdRef.current);
+      clearOrgCaches();
+    };
+  }, [isSuperAdmin, isAuditMode]);
+
   const fetchInitialData = async () => {
+    if (isSuperAdmin && isAuditMode && !auditOrgId) {
+      setLogs([]); setEmployees([]); setDepartments([]);
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     try {
       // Attendance Logs may show historical data (my logs + audit mode).
@@ -120,8 +162,14 @@ const AttendanceLogs: React.FC<AttendanceLogsProps> = ({ user, viewMode = 'MY', 
   };
 
   useEffect(() => {
+    if (isSuperAdmin && isAuditMode && auditOrgId) {
+      apiClient.setOrganizationId(auditOrgId);
+      clearOrgCaches();
+      setEmployeeFilter('ALL');
+      setDeptFilter('ALL');
+    }
     fetchInitialData();
-  }, [user.id, viewMode, user.role]);
+  }, [user.id, viewMode, user.role, auditOrgId]);
 
   // Deep link: pre-filter to specific employee when filterEmployeeId is provided
   useEffect(() => {
@@ -292,9 +340,23 @@ const AttendanceLogs: React.FC<AttendanceLogsProps> = ({ user, viewMode = 'MY', 
             {isAuditMode ? 'Consolidated organization tracking (First-In / Last-Out)' : 'Your consolidated workday records'}
           </p>
         </div>
-        <div className="flex gap-2">
-          {isAdmin && isAuditMode && (
-            <button 
+        <div className="flex flex-wrap gap-2">
+          {isSuperAdmin && isAuditMode && (
+            <div className="relative min-w-[220px] flex-1 md:flex-none">
+              <Building className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
+              <select
+                aria-label="Organization"
+                className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:ring-4 focus:ring-primary-light"
+                value={auditOrgId}
+                onChange={e => setAuditOrgId(e.target.value)}
+              >
+                <option value="">Choose an organization…</option>
+                {orgOptions.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
+              </select>
+            </div>
+          )}
+          {isAdmin && isAuditMode && (!isSuperAdmin || auditOrgId) && (
+            <button
               onClick={() => setShowAbsentModal(true)}
               className="p-3 bg-rose-50 border border-rose-100 rounded-2xl shadow-sm text-rose-600 hover:bg-rose-100 transition-all flex items-center gap-2"
             >
@@ -465,7 +527,9 @@ const AttendanceLogs: React.FC<AttendanceLogsProps> = ({ user, viewMode = 'MY', 
         {!isLoading && filteredAndSortedLogs.length === 0 && (
           <div className="py-20 text-center space-y-4">
              <History size={48} className="mx-auto text-slate-100" />
-             <p className="text-slate-400 font-semibold uppercase text-xs tracking-widest">No matching logs found.</p>
+             <p className="text-slate-400 font-semibold uppercase text-xs tracking-widest">{isSuperAdmin && isAuditMode && !auditOrgId
+                 ? 'Choose an organization to see its attendance.'
+                 : 'No matching logs found.'}</p>
           </div>
         )}
       </div>

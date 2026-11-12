@@ -82,6 +82,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, navParams, onNavigate, o
   // Super Admin has a different menu
   const superAdminMenuItems = [
     { id: 'profile', label: 'My Profile', icon: UserCircle, roles: ['SUPER_ADMIN'] },
+    { id: 'attendance-audit', label: 'Attendance Audit', icon: List, roles: ['SUPER_ADMIN'] },
   ];
   const superAdminTab = (currentPath === 'super-admin' || currentPath === 'dashboard') ? (navParams?.tab || 'organizations') : null;
 
