@@ -14,13 +14,6 @@ interface Props {
   onNavigate: (path: string, params?: any) => void;
 }
 
-const TILE_COLORS = [
-  'bg-blue-50 text-blue-600 border-blue-100',
-  'bg-emerald-50 text-emerald-600 border-emerald-100',
-  'bg-amber-50 text-amber-600 border-amber-100',
-  'bg-purple-50 text-purple-600 border-purple-100',
-  'bg-teal-50 text-teal-600 border-teal-100',
-];
 
 const QUICK_ACTION_GROUPS = [
   {
@@ -68,21 +61,21 @@ export const AdminDashboard: React.FC<Props> = ({ data, isLoading, onNavigate })
           {/* Quick Actions */}
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 md:p-6 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center"><Zap size={18} /></div>
+              <div className="w-9 h-9 rounded-xl bg-primary-light text-primary flex items-center justify-center"><Zap size={18} /></div>
               <h2 className="text-base md:text-lg font-semibold text-slate-900">Quick Actions</h2>
             </div>
             {QUICK_ACTION_GROUPS.map(group => (
               <div key={group.label} className="space-y-2">
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{group.label}</p>
                 <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 md:gap-3">
-                  {group.items.map((item, i) => (
+                  {group.items.map(item => (
                     <button
                       key={item.path}
                       onClick={() => onNavigate(item.path)}
-                      className={`flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-xl border font-semibold text-xs md:text-sm transition-all hover:-translate-y-0.5 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${TILE_COLORS[i % TILE_COLORS.length]}`}
+                      className="group flex flex-col items-center justify-center gap-2 py-3.5 px-2 rounded-xl border border-slate-200 bg-white font-medium text-xs md:text-sm transition-colors hover:border-primary hover:bg-primary-light focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     >
-                      <item.icon size={20} />
-                      <span className="truncate max-w-full text-slate-700">{item.label}</span>
+                      <item.icon size={20} className="text-primary" />
+                      <span className="truncate max-w-full text-slate-700 group-hover:text-primary">{item.label}</span>
                     </button>
                   ))}
                 </div>

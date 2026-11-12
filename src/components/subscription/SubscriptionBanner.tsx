@@ -17,17 +17,17 @@ export const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({ onUpgrad
   // Demo mode banner — always visible on every page
   if (subscription.isDemo) {
     return (
-      <div className="px-4 py-2.5 flex items-center justify-between text-sm bg-indigo-50 border-b border-indigo-200 text-indigo-700">
-        <div className="flex items-center gap-2">
+      <div className="px-4 py-2.5 flex items-center justify-between gap-3 text-sm bg-indigo-50 border-b border-indigo-200 text-indigo-700">
+        <div className="flex items-center gap-2 min-w-0">
           <Beaker className="w-4 h-4 flex-shrink-0" />
           <span className="font-medium">
-            🧪 Demo Mode — Data resets daily. No data saved.
+            Demo mode — you are exploring a sample organization.
           </span>
         </div>
         {onExitDemo && (
           <button
             onClick={onExitDemo}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-lg text-xs font-semibold transition-colors"
+            className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-lg text-xs font-semibold transition-colors"
           >
             <LogOut size={12} /> Exit Demo
           </button>

@@ -17,6 +17,22 @@ self.addEventListener('message', (event) => {
 clientsClaim();
 cleanupOutdatedCaches();
 
+// Remove the REST cache that earlier versions of this worker filled.
+self.addEventListener('activate', (event) => {
+  event.waitUntil(caches.delete('supabase-rest-v1'));
+});
+
+/**
+ * The app routes by hash (#/attendance). Push payloads carry plain paths such as
+ * "/attendance" or "attendance", which would open the 404 page; map them onto the
+ * hash route. Absolute URLs and targets that already carry a hash pass through.
+ */
+function toAppUrl(target: string): string {
+  if (/^https?:\/\//.test(target) || target.includes('#')) return target;
+  const path = target.startsWith('/') ? target : '/' + target;
+  return path === '/' ? '/' : '/#' + path;
+}
+
 // Injected by VitePWA at build time
 precacheAndRoute(self.__WB_MANIFEST);
 
@@ -65,20 +81,12 @@ registerRoute(
   new NetworkOnly(),
 );
 
-// Supabase REST — NetworkFirst with 8s timeout for iOS LTE
+// Supabase REST — never cache. These responses are private employee data
+// (attendance, leave, profiles, salaries); a cached copy would outlive sign-out
+// on a shared device. The pages that read them need a connection anyway.
 registerRoute(
-  ({ url, request }) =>
-    request.method === 'GET' &&
-    url.host.endsWith('.supabase.co') &&
-    /^\/rest\/v1\//.test(url.pathname),
-  new NetworkFirst({
-    cacheName: 'supabase-rest-v1',
-    networkTimeoutSeconds: 8,
-    plugins: [
-      new ExpirationPlugin({ maxEntries: 200, maxAgeSeconds: 60 * 5 }),
-      new CacheableResponsePlugin({ statuses: [200] }),
-    ],
-  }),
+  ({ url }) => url.host.endsWith('.supabase.co') && /^\/rest\/v1\//.test(url.pathname),
+  new NetworkOnly(),
 );
 
 // Google Fonts stylesheets
@@ -169,7 +177,7 @@ self.addEventListener('push', (event: PushEvent) => {
 
 self.addEventListener('notificationclick', (event: NotificationEvent) => {
   event.notification.close();
-  const targetUrl = (event.notification.data?.url as string) ?? '/dashboard';
+  const targetUrl = toAppUrl((event.notification.data?.url as string) ?? '/dashboard');
 
   event.waitUntil(
     self.clients

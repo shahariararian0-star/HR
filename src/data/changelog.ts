@@ -15,6 +15,17 @@ export interface ChangelogRelease {
 
 export const changelog: ChangelogRelease[] = [
   {
+    date: '2026-11-12',
+    title: 'Consistent design system, dark mode fixes and safer installed app',
+    entries: [
+      { type: 'improvement', description: 'The signed-in app now uses one design system: a single corner-radius scale, one page-title size, one accent colour for selected states, a minimum text size of 11px, calmer label spacing and the same focus ring everywhere. The sidebar is slimmer and lines up with the header, dashboard quick actions share one tile style, and the header no longer shows the decorative "Cloud Node Alpha" badge. Every page, menu item, permission and workflow is unchanged.' },
+      { type: 'fix', description: 'Dark mode now covers the shades it used to miss: translucent panels (such as Departments in Reports), hover states, coloured status labels and tinted badges, and dark buttons that disappeared into the background. All are readable in both themes.' },
+      { type: 'security', description: 'The installed app no longer stores private employee data (attendance, leave, profiles) in the browser cache. Those requests now always go to the server, and the cache earlier versions filled is deleted when the app updates.' },
+      { type: 'fix', description: 'Tapping a check-in reminder notification now opens the Attendance page instead of the "page not found" screen.' },
+      { type: 'improvement', description: 'The install manifest uses the app background colour, allows any screen orientation, and ships padded maskable icons so Android no longer crops the logo. The demo banner no longer claims the demo resets daily, and its Exit Demo button stays visible on phones.' },
+    ],
+  },
+  {
     date: '2026-10-26',
     title: 'Clearer Payment Settings description',
     entries: [

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Database, Menu, X, LayoutDashboard, Clock, CalendarDays, UserCircle, Sun, Moon, MoreHorizontal } from 'lucide-react';
+import { Menu, X, LayoutDashboard, Clock, CalendarDays, UserCircle, Sun, Moon, MoreHorizontal } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import NotificationBell from '../components/notifications/NotificationBell';
 import { useAuth } from '../context/AuthContext';
@@ -44,7 +44,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentPath, navParam
   const isBottomNavActive = BOTTOM_NAV.some(item => item.match.includes(currentPath));
 
   return (
-    <div className="flex bg-app-bg min-h-[100dvh] relative overflow-hidden">
+    <div className="app-shell flex bg-app-bg min-h-[100dvh] relative overflow-hidden">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-primary focus:text-white focus:font-semibold focus:shadow-lg"
@@ -70,9 +70,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentPath, navParam
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 lg:ml-72 flex flex-col min-h-[100dvh] max-w-full min-w-0 overflow-hidden">
+      <main className="flex-1 lg:ml-64 flex flex-col min-h-[100dvh] max-w-full min-w-0 overflow-hidden">
         {/* Header */}
-        <header className="h-16 lg:h-20 bg-white/90 backdrop-blur-xl border-b border-app-border flex items-center justify-between gap-2 px-4 sm:px-6 lg:px-8 sticky top-0 z-40">
+        <header className="h-16 bg-[color-mix(in_srgb,var(--ui-surface)_88%,transparent)] backdrop-blur-xl border-b border-app-border flex items-center justify-between gap-2 px-4 sm:px-6 lg:px-8 sticky top-0 z-40">
            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -83,10 +83,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentPath, navParam
               </button>
 
               <BrandMark size={32} className="lg:hidden" />
-              <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full border bg-slate-50 text-slate-500 border-slate-100">
-                <Database size={12} />
-                <span className="text-[10px] font-semibold uppercase tracking-widest">Cloud Node Alpha</span>
-              </div>
            </div>
 
            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
@@ -106,7 +102,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentPath, navParam
               >
                 <img
                   src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}`}
-                  className="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-slate-50 object-cover ring-2 ring-transparent hover:ring-primary transition-all flex-shrink-0"
+                  className="w-9 h-9 rounded-full bg-slate-50 object-cover ring-2 ring-transparent hover:ring-primary transition-all flex-shrink-0"
                   alt=""
                   width={40}
                   height={40}
@@ -134,7 +130,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, currentPath, navParam
         {/* Bottom Navigation (phones and tablets) */}
         <nav
           aria-label="Quick navigation"
-          className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-2xl border-t border-app-border grid grid-cols-5 gap-1 px-2 pt-2 z-50 pb-[calc(0.5rem+env(safe-area-inset-bottom))]"
+          className="lg:hidden fixed bottom-0 left-0 right-0 bg-[color-mix(in_srgb,var(--ui-surface)_94%,transparent)] backdrop-blur-2xl border-t border-app-border grid grid-cols-5 gap-1 px-2 pt-2 z-50 pb-[calc(0.5rem+env(safe-area-inset-bottom))]"
         >
           {BOTTOM_NAV.map(item => {
             const isActive = item.match.includes(currentPath);

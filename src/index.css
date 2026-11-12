@@ -374,6 +374,171 @@ html.dark body { background-color: var(--app-bg); color: #E2E8F0; }
 .dark .border-rose-100, .dark .border-rose-200 { border-color: rgba(244, 63, 94, 0.25) !important; }
 .dark .border-blue-100, .dark .border-indigo-100 { border-color: rgba(50, 145, 255, 0.25) !important; }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   APP DESIGN SYSTEM — semantic tokens for the signed-in app
+   ═══════════════════════════════════════════════════════════════════════
+
+   Every page was written with raw palette utilities (text-slate-*, bg-white,
+   text-emerald-700, …), so theming happens here, once, rather than in 98 files:
+
+   1. Semantic tokens (--ui-*) for both themes. New and restyled markup uses
+      the .ui-* classes below or the --ui-* variables directly.
+   2. In dark mode the light neutral steps (slate-50/100/200) are redefined as
+      variables, so every derived utility follows: opacity variants
+      (bg-slate-50/50), hover/focus variants, rings, gradients. The !important
+      rules above only covered the bare class names.
+   3. Status text (-500…-900) and tints (-50/-100) are remapped for dark
+      surfaces so labels keep their meaning and clear contrast.
+   4. Inside .app-shell: one radius scale, an 11px type floor, and calmer
+      letter-spacing on the uppercase micro-labels. */
+:root {
+  --ui-page: #F5F7FB;
+  --ui-surface: #FFFFFF;
+  --ui-sunken: #F8FAFC;
+  --ui-hover: #F1F4F9;
+  --ui-border: #E6EAF0;
+  --ui-border-strong: #D5DCE6;
+  --ui-text: #101828;
+  --ui-text-2: #344054;
+  --ui-muted: #667085;
+  --ui-subtle: #98A2B3;
+  --ui-ring: rgba(22, 119, 255, .35);
+  --ui-shadow-1: 0 1px 2px rgba(16, 24, 40, .04), 0 1px 3px rgba(16, 24, 40, .06);
+  --ui-shadow-2: 0 2px 4px -2px rgba(16, 24, 40, .06), 0 12px 24px -8px rgba(16, 24, 40, .12);
+  --ui-radius-sm: 8px;
+  --ui-radius: 10px;
+  --ui-radius-lg: 12px;
+  --ui-radius-xl: 16px;
+}
+
+:root.dark {
+  --ui-page: #080F1F;
+  --ui-surface: #101D32;
+  --ui-sunken: #0C1729;
+  --ui-hover: #1B2C45;
+  --ui-border: #26354B;
+  --ui-border-strong: #33455F;
+  --ui-text: #F8FAFC;
+  --ui-text-2: #CBD5E1;
+  --ui-muted: #A6B4CC;
+  --ui-subtle: #7D8BA3;
+  --ui-ring: rgba(50, 145, 255, .45);
+  --ui-shadow-1: 0 1px 2px rgba(0, 0, 0, .35);
+  --ui-shadow-2: 0 2px 4px -2px rgba(0, 0, 0, .4), 0 12px 24px -8px rgba(0, 0, 0, .55);
+
+  /* Light neutral steps become dark surface steps (see 2. above). */
+  --color-slate-50: #17263D;
+  --color-slate-100: #1B2C45;
+  --color-slate-200: #26354B;
+  --color-gray-50: #17263D;
+  --color-gray-100: #1B2C45;
+  --color-gray-200: #26354B;
+}
+
+/* Explicit dark: text utilities that pointed at those steps stay light. */
+.dark .dark\:text-slate-100 { color: #F1F5F9 !important; }
+.dark .dark\:text-slate-300 { color: #CBD5E1 !important; }
+
+/* Dark slabs (selected chips, "dark" buttons, preview panels) — lift them off the
+   navy card instead of sinking them into near-black. */
+.dark .bg-slate-900 { background-color: #1E3150 !important; }
+.dark .bg-slate-800 { background-color: #22385A !important; }
+.dark .hover\:bg-slate-800:hover, .dark .hover\:bg-slate-900:hover, .dark .hover\:bg-black:hover { background-color: #2A4268 !important; }
+.dark .bg-black { background-color: #1E3150 !important; }
+.dark .border-slate-900, .dark .border-slate-800 { border-color: #33455F !important; }
+
+/* Status text on dark surfaces */
+.dark .text-emerald-500, .dark .text-emerald-600, .dark .text-emerald-700, .dark .text-emerald-800, .dark .text-emerald-900,
+.dark .text-green-600, .dark .text-green-700, .dark .text-green-800, .dark .text-green-900 { color: #4ADE80 !important; }
+.dark .text-rose-600, .dark .text-rose-700, .dark .text-rose-800, .dark .text-rose-900,
+.dark .text-red-600, .dark .text-red-700, .dark .text-red-800, .dark .text-red-900 { color: #FB7185 !important; }
+.dark .text-amber-600, .dark .text-amber-700, .dark .text-amber-800, .dark .text-amber-900,
+.dark .text-orange-600, .dark .text-orange-700, .dark .text-orange-800,
+.dark .text-yellow-600, .dark .text-yellow-700, .dark .text-yellow-800 { color: #FBBF24 !important; }
+.dark .text-blue-600, .dark .text-blue-700, .dark .text-blue-800,
+.dark .text-sky-600, .dark .text-sky-700 { color: #60A5FA !important; }
+.dark .text-indigo-500, .dark .text-indigo-600, .dark .text-indigo-700, .dark .text-indigo-800 { color: #A5B4FC !important; }
+.dark .text-purple-600, .dark .text-purple-700, .dark .text-violet-600, .dark .text-violet-700 { color: #C4B5FD !important; }
+.dark .text-teal-600, .dark .text-teal-700, .dark .text-cyan-600, .dark .text-cyan-700 { color: #5EEAD4 !important; }
+.dark .text-pink-600, .dark .text-pink-700 { color: #F9A8D4 !important; }
+
+/* Status tints on dark surfaces (the -50 set is above; -100 and the remaining hues here) */
+.dark .bg-emerald-100, .dark .bg-green-50, .dark .bg-green-100 { background-color: rgba(32, 213, 138, .16) !important; }
+.dark .bg-rose-100, .dark .bg-red-50, .dark .bg-red-100 { background-color: rgba(244, 63, 94, .16) !important; }
+.dark .bg-amber-100, .dark .bg-orange-50, .dark .bg-orange-100, .dark .bg-yellow-50, .dark .bg-yellow-100 { background-color: rgba(255, 170, 50, .16) !important; }
+.dark .bg-blue-100, .dark .bg-sky-50, .dark .bg-sky-100 { background-color: rgba(50, 145, 255, .16) !important; }
+.dark .bg-indigo-100, .dark .bg-purple-100, .dark .bg-violet-100 { background-color: rgba(129, 120, 255, .18) !important; }
+.dark .bg-teal-100, .dark .bg-cyan-50, .dark .bg-cyan-100 { background-color: rgba(45, 212, 191, .16) !important; }
+.dark .bg-pink-50, .dark .bg-pink-100 { background-color: rgba(244, 114, 182, .14) !important; }
+.dark .border-green-100, .dark .border-green-200, .dark .border-red-100, .dark .border-red-200,
+.dark .border-orange-100, .dark .border-orange-200, .dark .border-yellow-100, .dark .border-yellow-200,
+.dark .border-purple-100, .dark .border-violet-100, .dark .border-teal-100, .dark .border-sky-100,
+.dark .border-blue-200, .dark .border-indigo-200, .dark .border-purple-200, .dark .border-pink-100 { border-color: rgba(148, 163, 184, .22) !important; }
+
+/* ── App shell normalisation ─────────────────────────────────────────── */
+/* One radius scale. Tailwind reads these variables, so every rounded-* in the app
+   follows; the arbitrary values below are the ones written as literals. */
+.app-shell {
+  --radius-lg: var(--ui-radius-sm);
+  --radius-xl: var(--ui-radius);
+  --radius-2xl: var(--ui-radius-lg);
+  --radius-3xl: var(--ui-radius-xl);
+  color: var(--ui-text);
+}
+.app-shell .rounded-\[1\.5rem\], .app-shell .rounded-\[24px\] { border-radius: var(--ui-radius-lg); }
+.app-shell .rounded-\[2rem\], .app-shell .rounded-\[32px\], .app-shell .rounded-\[2\.5rem\], .app-shell .rounded-\[3rem\] { border-radius: var(--ui-radius-xl); }
+
+/* Type floor: nothing in the app renders below 11px. */
+.app-shell .text-\[7px\], .app-shell .text-\[8px\], .app-shell .text-\[9px\], .app-shell .text-\[10px\] { font-size: 11px; line-height: 1.35; }
+
+/* Uppercase micro-labels read as shouting at wide tracking; keep the case, calm the spacing. */
+.app-shell .tracking-widest { letter-spacing: .06em; }
+.app-shell .tracking-wider { letter-spacing: .04em; }
+.app-shell .tracking-\[0\.2em\], .app-shell .tracking-\[0\.3em\], .app-shell .tracking-\[0\.15em\] { letter-spacing: .06em; }
+/* Buttons read better in sentence weight than in letter-spaced capitals. */
+.app-shell button.uppercase { text-transform: none; letter-spacing: 0; }
+
+/* One page-title scale. Pages set text-2xl, 3xl or 4xl on their own; the title is the
+   same size on every screen now. */
+.app-shell #main-content h1 { font-size: 1.5rem; line-height: 2rem; font-weight: 700; letter-spacing: -0.02em; }
+@media (min-width: 1024px) { .app-shell #main-content h1 { font-size: 1.75rem; line-height: 2.25rem; } }
+
+/* One accent. Indigo/violet were used as a second brand colour for selected states;
+   they now resolve to the brand blue so "selected" looks the same everywhere. */
+.app-shell .bg-indigo-500, .app-shell .bg-indigo-600 { background-color: var(--primary); }
+.app-shell .hover\:bg-indigo-600:hover, .app-shell .hover\:bg-indigo-700:hover { background-color: var(--primary-hover); }
+.app-shell .border-indigo-500, .app-shell .border-indigo-600 { border-color: var(--primary); }
+.app-shell .text-indigo-500, .app-shell .text-indigo-600, .app-shell .text-indigo-700,
+.app-shell .hover\:text-indigo-600:hover { color: var(--primary) !important; }
+.app-shell .bg-indigo-50, .app-shell .bg-indigo-100, .app-shell .bg-violet-100, .app-shell .bg-purple-50, .app-shell .bg-purple-100 { background-color: var(--primary-light) !important; }
+.app-shell .border-indigo-100, .app-shell .border-indigo-200, .app-shell .hover\:border-indigo-200:hover { border-color: color-mix(in srgb, var(--primary) 25%, transparent) !important; }
+.app-shell .text-violet-600, .app-shell .text-purple-600, .app-shell .text-purple-700 { color: var(--primary) !important; }
+
+/* Cards: the white surface utilities pick up the two-layer shadow and hairline. */
+.app-shell .shadow-sm { box-shadow: var(--ui-shadow-1); }
+.app-shell .shadow-lg, .app-shell .shadow-xl, .app-shell .shadow-2xl { box-shadow: var(--ui-shadow-2); }
+.dark .app-shell .shadow-sm { box-shadow: var(--ui-shadow-1) !important; }
+.dark .app-shell .shadow-lg, .dark .app-shell .shadow-xl, .dark .app-shell .shadow-2xl { box-shadow: var(--ui-shadow-2) !important; }
+
+/* Focus: one visible ring everywhere in the app. */
+.app-shell :is(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Touch targets on phones */
+@media (max-width: 1023px) {
+  .app-shell select, .app-shell input:not([type="checkbox"]):not([type="radio"]) { min-height: 44px; }
+}
+
+/* ── Reusable primitives (for restyled markup) ───────────────────────── */
+.ui-card { background: var(--ui-surface); border: 1px solid var(--ui-border); border-radius: var(--ui-radius-lg); box-shadow: var(--ui-shadow-1); }
+.ui-page-title { font-size: 1.5rem; line-height: 2rem; font-weight: 700; letter-spacing: -0.02em; color: var(--ui-text); }
+@media (min-width: 1024px) { .ui-page-title { font-size: 1.75rem; line-height: 2.25rem; } }
+.ui-page-subtitle { font-size: .875rem; color: var(--ui-muted); margin-top: .25rem; }
+.ui-label { font-size: .75rem; font-weight: 600; color: var(--ui-muted); }
+.ui-chip { display: inline-flex; align-items: center; gap: .375rem; height: 2rem; padding: 0 .75rem; border-radius: 9999px; border: 1px solid var(--ui-border); background: var(--ui-surface); color: var(--ui-text-2); font-size: .8125rem; font-weight: 500; }
+
 /* ===== DARK MODE — PROSE / RICH CONTENT OVERRIDES ===== */
 /* prose-invert handles most elements, these cover edge cases from WYSIWYG content */
 

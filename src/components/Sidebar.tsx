@@ -71,8 +71,8 @@ const SUPER_ADMIN_SECTIONS = [
 ];
 
 const navItemClass = (isActive: boolean) =>
-  `w-full flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl transition-colors relative group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-    isActive ? 'bg-primary-light text-primary' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+  `w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg transition-colors relative group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+    isActive ? 'bg-primary-light text-primary' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
   }`;
 
 const Sidebar: React.FC<SidebarProps> = ({ currentPath, navParams, onNavigate, onLogout, role, user }) => {
@@ -104,17 +104,17 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, navParams, onNavigate, o
   const filteredItems = menuItems.filter(item => item.roles.includes(role));
 
   return (
-    <aside className="w-72 bg-app-sidebar h-[100dvh] flex flex-col border-r border-app-border relative z-50">
+    <aside className="w-64 bg-app-sidebar h-[100dvh] flex flex-col border-r border-app-border relative z-50">
       {/* Brand */}
-      <div className="h-20 px-6 flex items-center flex-shrink-0">
+      <div className="h-16 px-5 flex items-center flex-shrink-0 border-b border-app-border">
         <BrandMark />
       </div>
 
       {/* Navigation */}
-      <nav aria-label="Main navigation" className="flex-1 px-3 py-2 space-y-1 overflow-y-auto no-scrollbar">
+      <nav aria-label="Main navigation" className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto no-scrollbar">
         {isSuperAdmin && SUPER_ADMIN_SECTIONS.map(section => (
           <div key={section.label} className="pb-2">
-            <p className="px-4 pt-2 pb-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">{section.label}</p>
+            <p className="px-3 pt-3 pb-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">{section.label}</p>
             <div className="space-y-0.5">
               {section.items.map(item => {
                 const isActive = superAdminTab === item.tab;
@@ -138,7 +138,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, navParams, onNavigate, o
             </div>
           </div>
         ))}
-        {isSuperAdmin && <p className="px-4 pt-2 pb-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Account</p>}
+        {isSuperAdmin && <p className="px-3 pt-3 pb-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Account</p>}
         {filteredItems.map((item) => {
           const isActive = currentPath === item.id;
           return (
@@ -146,17 +146,13 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, navParams, onNavigate, o
               key={item.id}
               onClick={() => onNavigate(item.id)}
               aria-current={isActive ? 'page' : undefined}
-              className={`w-full flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl transition-colors relative group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-                isActive
-                  ? 'bg-primary-light text-primary'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-              }`}
+              className={navItemClass(isActive)}
             >
               <div className="flex items-center gap-3 min-w-0">
                 {isActive && (
                   <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full" aria-hidden="true"></span>
                 )}
-                <item.icon size={20} className={isActive ? 'text-primary' : 'text-slate-400 group-hover:text-slate-600'} />
+                <item.icon size={18} className={isActive ? 'text-primary' : 'text-slate-400 group-hover:text-slate-600'} />
                 <span className={`text-sm truncate ${isActive ? 'font-semibold' : 'font-medium'}`}>{item.label}</span>
               </div>
               {!isSuperAdmin && (
@@ -171,11 +167,11 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, navParams, onNavigate, o
       <div className="p-3 border-t border-app-border flex-shrink-0 space-y-2">
         <button
           onClick={() => onNavigate('profile')}
-          className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-slate-100 transition-colors text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           <img
             src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.name || 'User'}&background=random`}
-            className="w-10 h-10 rounded-full bg-slate-50 object-cover flex-shrink-0"
+            className="w-9 h-9 rounded-full bg-slate-100 object-cover flex-shrink-0"
             alt=""
           />
           <div className="min-w-0">
@@ -185,7 +181,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, navParams, onNavigate, o
         </button>
         <button
           onClick={onLogout}
-          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-600 hover:bg-rose-50 hover:text-rose-600 transition-colors group focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-rose-50 hover:text-rose-600 transition-colors group focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
         >
           <LogOut size={18} className="text-slate-400 group-hover:text-rose-600" />
           <span className="text-sm font-semibold">Sign Out</span>
