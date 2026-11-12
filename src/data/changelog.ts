@@ -22,6 +22,7 @@ export const changelog: ChangelogRelease[] = [
       { type: 'fix', description: 'Dark mode now covers the shades it used to miss: translucent panels (such as Departments in Reports), hover states, coloured status labels and tinted badges, and dark buttons that disappeared into the background. All are readable in both themes.' },
       { type: 'security', description: 'The installed app no longer stores private employee data (attendance, leave, profiles) in the browser cache. Those requests now always go to the server, and the cache earlier versions filled is deleted when the app updates.' },
       { type: 'fix', description: 'Tapping a check-in reminder notification now opens the Attendance page instead of the "page not found" screen.' },
+      { type: 'improvement', description: 'New link-preview description for shared links (Open Graph and Twitter cards): "Track attendance, manage leave and approvals, and keep your team\'s records in one place. Simple HR software for growing teams."' },
       { type: 'fix', description: 'A team leader who is a member of their own team can no longer approve their own leave. Their requests now go straight to HR, and their own requests no longer appear in their team approval list.' },
       { type: 'improvement', description: 'The install manifest uses the app background colour, allows any screen orientation, and ships padded maskable icons so Android no longer crops the logo. The demo banner no longer claims the demo resets daily, and its Exit Demo button stays visible on phones.' },
     ],
