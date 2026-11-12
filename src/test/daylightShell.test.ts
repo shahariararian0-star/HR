@@ -18,9 +18,9 @@ import { dlShell, dlBrand, dlNav, dlFooter } from '../components/shared/daylight
 const SHELLS = [
   ['landing/Navbar', 'src/components/landing/Navbar.tsx'],
   ['landing/Footer', 'src/components/landing/Footer.tsx'],
-  ['blog/BlogNavbar', 'src/components/blog/BlogNavbar.tsx'],
+  // BlogNavbar and TutorialsNavbar now only render this shared navbar.
+  ['shared/PublicNavbar', 'src/components/shared/PublicNavbar.tsx'],
   ['blog/BlogFooter', 'src/components/blog/BlogFooter.tsx'],
-  ['tutorials/TutorialsNavbar', 'src/components/tutorials/TutorialsNavbar.tsx'],
   ['tutorials/TutorialsFooter', 'src/components/tutorials/TutorialsFooter.tsx'],
 ] as const;
 
