@@ -148,7 +148,7 @@ const TutorialPage: React.FC<TutorialPageProps> = ({ slug, onBack }) => {
   const categories = Array.from(new Set(topLevel.map(t => t.category || 'General')));
 
   return (
-    <div className="min-h-screen bg-dl-ground flex flex-col">
+    <div className="sc-landing min-h-screen bg-dl-ground flex flex-col">
       <TutorialsNavbar onBack={onBack} />
 
       <div className="flex-1">

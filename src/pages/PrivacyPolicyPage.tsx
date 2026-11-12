@@ -50,7 +50,7 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onBack }) => {
   };
 
   return (
-    <div className="min-h-screen bg-dl-ground flex flex-col">
+    <div className="sc-landing min-h-screen bg-dl-ground flex flex-col">
       <BlogNavbar onBack={handleBack} />
 
       {/* Header */}

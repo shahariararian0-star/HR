@@ -67,7 +67,7 @@ const FeatureDetailPage: React.FC<FeatureDetailPageProps> = ({ slug, onBack, onR
 
   if (!feature) {
     return (
-      <div className="min-h-screen bg-dl-ground flex flex-col">
+      <div className="sc-landing min-h-screen bg-dl-ground flex flex-col">
         <BlogNavbar onBack={onBack} />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center py-20">
@@ -89,7 +89,7 @@ const FeatureDetailPage: React.FC<FeatureDetailPageProps> = ({ slug, onBack, onR
   const FeatureIcon = feature.icon;
 
   return (
-    <div className="min-h-screen bg-dl-ground flex flex-col">
+    <div className="sc-landing min-h-screen bg-dl-ground flex flex-col">
       <BlogNavbar onBack={onBack} />
 
       {/* Breadcrumb */}

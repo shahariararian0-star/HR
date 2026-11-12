@@ -42,7 +42,7 @@ const ChangelogPage: React.FC<ChangelogPageProps> = ({ onBack }) => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-dl-surface">
+    <div className="sc-landing min-h-screen bg-dl-surface">
       <BlogNavbar onBack={onBack} />
 
       {/* Hero */}

@@ -105,7 +105,7 @@ const TutorialsPage: React.FC<TutorialsPageProps> = ({ onBack, onRegisterClick }
       .sort((a, b) => a.displayOrder - b.displayOrder);
 
   return (
-    <div className="min-h-screen bg-dl-ground flex flex-col">
+    <div className="sc-landing min-h-screen bg-dl-ground flex flex-col">
       <TutorialsNavbar onBack={onBack} onRegisterClick={onRegisterClick} />
 
       {/* Header */}

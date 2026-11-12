@@ -96,7 +96,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ onBack, onRegisterClick }) =>
   }, []);
 
   return (
-    <div className="min-h-screen bg-dl-ground">
+    <div className="sc-landing min-h-screen bg-dl-ground">
       <BlogNavbar onBack={onBack} onRegisterClick={onRegisterClick} />
 
       <main className="pt-24 md:pt-32">

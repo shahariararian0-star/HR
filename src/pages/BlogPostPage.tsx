@@ -118,7 +118,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ slug, onBack }) => {
   };
 
   return (
-    <div className="min-h-screen bg-dl-ground flex flex-col">
+    <div className="sc-landing min-h-screen bg-dl-ground flex flex-col">
       {/* Navbar */}
       <BlogNavbar onBack={onBack} />
 

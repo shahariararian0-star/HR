@@ -683,10 +683,10 @@ html.dark body { background-color: var(--app-bg); color: #E2E8F0; }
 }
 
 /* ===== STAFFCOVE LANDING PALETTE ===== */
-/* The home page wears the StaffCove navy/blue brand instead of Daylight teal. The
-   dl- utilities read the --color-dl-* theme variables, so remapping those on the
-   landing wrapper re-themes every landing section (navbar and footer included)
-   without touching the blog, tutorials or any other public page. */
+/* Every public page (home, blog, guides, features, about, contact, changelog,
+   legal) wears the StaffCove navy/blue brand instead of Daylight teal. The dl-
+   utilities read the --color-dl-* theme variables, so remapping those on each
+   page's root wrapper re-themes the whole page, navbar and footer included. */
 .sc-landing {
   --dl-teal: #1677FF;
   --dl-teal-deep: #0E63D8;
