@@ -22,8 +22,9 @@ const ManagerialLeaveModule: React.FC<Props> = ({ user, requests, onRefresh, rol
 
   // Filter requests: Show if I am the line manager OR (if the requester is in my team and I am the leader)
   const myPendingRequests = requests.filter(r => 
-    r.status === 'PENDING_MANAGER' && 
-    (r.lineManagerId === user.id)
+    r.status === 'PENDING_MANAGER' &&
+    (r.lineManagerId === user.id) &&
+    r.employeeId !== user.id // never review your own leave
   );
 
   const handleAction = async (action: 'APPROVED' | 'REJECTED') => {

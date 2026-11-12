@@ -85,6 +85,11 @@ export const leaveService = {
           .single();
         department = emp?.department || 'Unassigned';
         lineManagerId = emp?.line_manager_id || null;
+        // A team leader placed in their own team becomes their own line manager.
+        // Nobody approves their own leave: route it to HR instead.
+        if (lineManagerId && lineManagerId.toString().trim() === data.employeeId.toString().trim()) {
+          lineManagerId = null;
+        }
       }
     } catch (e) { console.error('Could not fetch employee details for workflow'); }
 
