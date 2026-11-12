@@ -12,6 +12,7 @@ import HelpButton from '../components/onboarding/HelpButton';
 import { ReEnableSetupGuide } from '../components/onboarding/SetupChecklist';
 import { contactService } from '../services/contact.service';
 import { useToast } from '../context/ToastContext';
+import { FingerprintDevices } from '../components/passkey/FingerprintDevices';
 
 interface SettingsProps {
   user: UserType;
@@ -327,6 +328,9 @@ const Settings: React.FC<SettingsProps> = ({ user, onBack }) => {
           </div>
         </div>
       )}
+
+      {/* Fingerprint sign-in and check-in (passkeys) */}
+      <FingerprintDevices userId={user.id} />
 
       {/* Admin Verification Panel */}
       {isAdmin && (

@@ -10,6 +10,27 @@ import { convertToWebP } from '../utils/imageConvert';
 import { checkInSyncQueue, classifySyncError } from './attendance/syncQueue';
 import { CheckInSyncEntry } from './attendance/syncQueue.types';
 import { officeWifiService } from './officeWifi.service';
+import { passkeyService } from './passkey.service';
+
+/**
+ * How an employee's own punch must be sent. While Office Wi-Fi Check-in or Fingerprint
+ * check-in is on, it goes through the attendance-punch edge function (the database guard
+ * from migrations 0043 / 0048 refuses direct writes); with fingerprint on, it also carries a
+ * fingerprint proof. Entries an Admin makes for someone else are never routed this way.
+ */
+async function ownPunchRoute(): Promise<{ viaServer: boolean; fingerprint: boolean }> {
+  const [wifi, fingerprint] = await Promise.all([
+    officeWifiService.isEnabled(),
+    passkeyService.isCheckinEnabled(),
+  ]);
+  return { viaServer: wifi || fingerprint, fingerprint };
+}
+
+async function isOwnRecord(employeeId: string | undefined): Promise<boolean> {
+  if (!employeeId) return false;
+  const { data } = await supabase.auth.getSession();
+  return data.session?.user?.id === employeeId.trim();
+}
 
 const SELFIE_WEBP_QUALITY = 0.65;
 const SELFIE_MAX_DIMENSION = 720;
@@ -321,10 +342,12 @@ export const attendanceService = {
     const payload = buildAttendancePayload(data, orgId ?? undefined);
     let createdId: string;
 
-    // Office Wi-Fi Check-in ON: the server checks the network and writes the row.
-    // No offline queue on this path — a replayed punch would be judged by whatever
-    // network the phone is on later, not where the employee actually was.
-    if (await officeWifiService.isEnabled()) {
+    // Office Wi-Fi or Fingerprint check-in ON: the server checks the network / fingerprint
+    // and writes the row. No offline queue on this path — a replayed punch would be judged
+    // by whatever network the phone is on later, not where the employee actually was.
+    const route = (await isOwnRecord(data.employeeId)) ? await ownPunchRoute() : { viaServer: false, fingerprint: false };
+    if (route.viaServer) {
+      const proof = route.fingerprint ? await passkeyService.getPunchProof() : undefined;
       const created = await officeWifiService.clockIn({
         date: payload.date,
         checkIn: payload.check_in,
@@ -333,7 +356,7 @@ export const attendanceService = {
         location: data.location,
         dutyType: payload.duty_type,
         employeeName: payload.employee_name,
-      });
+      }, proof);
       createdId = created.id;
     } else {
       try {
@@ -443,7 +466,9 @@ export const attendanceService = {
     opts?: { selfPunch?: boolean; gps?: { lat: number; lng: number } | null },
   ) {
     if (!isSupabaseConfigured()) return;
-    if (opts?.selfPunch && data.checkOut && (await officeWifiService.isEnabled())) {
+    const route = opts?.selfPunch && data.checkOut ? await ownPunchRoute() : { viaServer: false, fingerprint: false };
+    if (route.viaServer) {
+      const proof = route.fingerprint ? await passkeyService.getPunchProof() : undefined;
       const { data: existing } = await supabase
         .from('attendance')
         .select('date')
@@ -453,8 +478,8 @@ export const attendanceService = {
         attendanceId: id.trim(),
         checkOut: hhmmToISO(data.checkOut, data.date || existing?.date),
         remarks: data.remarks,
-        gps: opts.gps,
-      });
+        gps: opts?.gps,
+      }, proof);
       attendanceService.clearCache();
       apiClient.notify();
       return;

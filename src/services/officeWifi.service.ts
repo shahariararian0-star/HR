@@ -68,6 +68,11 @@ async function invokeOrThrow(name: string, body: Record<string, any>): Promise<a
       payload = await (error as any).context?.json?.();
     } catch {}
     if (payload?.error === 'OFFICE_WIFI_REQUIRED') throw new OfficeWifiRequiredError();
+    if (payload?.error === 'FINGERPRINT_REQUIRED') {
+      const err: any = new Error(payload?.message || 'Please confirm with your fingerprint to check in.');
+      err.code = 'FINGERPRINT_REQUIRED';
+      throw err;
+    }
     throw new Error(payload?.error || error.message || `${name} failed`);
   }
   return data;
@@ -103,12 +108,15 @@ export const officeWifiService = {
     location: { lat: number; lng: number; address?: string } | undefined;
     dutyType?: string;
     employeeName?: string;
-  }): Promise<{ id: string }> {
-    return invokeOrThrow('attendance-punch', { action: 'clock_in', record });
+  }, passkey?: { challengeId: string; response: unknown }): Promise<{ id: string }> {
+    return invokeOrThrow('attendance-punch', { action: 'clock_in', record, passkey });
   },
 
-  async clockOut(params: { attendanceId: string; checkOut: string | null; remarks?: string; gps?: { lat: number; lng: number } | null }): Promise<void> {
-    await invokeOrThrow('attendance-punch', { action: 'clock_out', ...params });
+  async clockOut(
+    params: { attendanceId: string; checkOut: string | null; remarks?: string; gps?: { lat: number; lng: number } | null },
+    passkey?: { challengeId: string; response: unknown },
+  ): Promise<void> {
+    await invokeOrThrow('attendance-punch', { action: 'clock_out', ...params, passkey });
   },
 
   async listNetworks(): Promise<OfficeNetwork[]> {

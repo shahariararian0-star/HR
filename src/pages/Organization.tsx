@@ -14,6 +14,7 @@ import { OrgStructure } from '../components/organization/OrgStructure';
 import { OrgTeams } from '../components/organization/OrgTeams';
 import { OrgPlacement } from '../components/organization/OrgPlacement';
 import { OrgOfficeWifi } from '../components/organization/OrgOfficeWifi';
+import { OrgBiometric } from '../components/organization/OrgBiometric';
 import { getEnabledDutyTypes } from '../utils/dutyTypes';
 import { OrgWorkflow } from '../components/organization/OrgWorkflow';
 import { OrgLeaves } from '../components/organization/OrgLeaves';
@@ -300,6 +301,7 @@ const Organization: React.FC<OrganizationProps> = ({ initialTab }) => {
                dutyLabels={{ OFFICE: config.dutyLabel1 || 'Office', FACTORY: config.dutyLabel2 || 'Factory' }}
                dutyTypes={getEnabledDutyTypes(config)}
              />
+             <OrgBiometric employees={employees} />
            </div>
         )}
 

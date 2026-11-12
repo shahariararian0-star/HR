@@ -16,7 +16,8 @@ declare global {
 }
 
 import React, { useState, useEffect } from 'react';
-import { Mail, Lock, ArrowRight, AlertCircle, RefreshCw, Eye, EyeOff, Download, X, Share, MoreVertical, RotateCcw, Building2, Send, Home, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, ArrowRight, AlertCircle, RefreshCw, Eye, EyeOff, Download, X, Share, MoreVertical, RotateCcw, Building2, Send, Home, CheckCircle2, Fingerprint } from 'lucide-react';
+import { passkeyService } from '../services/passkey.service';
 import { hrService } from '../services/hrService';
 import { authService } from '../services/auth.service';
 import { isSupabaseConfigured } from '../services/supabase';
@@ -58,6 +59,29 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, onRegisterClick, onBackTo
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(initError || '');
   const [isLoading, setIsLoading] = useState(false);
+  // Fingerprint sign-in (passkeys). Shown only on devices with a built-in unlock.
+  const [canUseFingerprint, setCanUseFingerprint] = useState(false);
+  const [isFingerprintLoading, setIsFingerprintLoading] = useState(false);
+  useEffect(() => {
+    passkeyService.isSupported().then(setCanUseFingerprint).catch(() => setCanUseFingerprint(false));
+  }, []);
+
+  const handleFingerprintLogin = async () => {
+    if (!isConfigured) return;
+    setIsFingerprintLoading(true);
+    setError('');
+    setShowResend(false);
+    try {
+      await passkeyService.signIn();
+      // Same path as the demo login: the app picks the new session up on load.
+      window.location.href = '/';
+    } catch (err: any) {
+      if (err?.code !== 'CANCELLED') {
+        setError(err?.message || 'Fingerprint sign-in failed. Please sign in with your password.');
+      }
+      setIsFingerprintLoading(false);
+    }
+  };
   const [showResend, setShowResend] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
@@ -512,6 +536,17 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, onRegisterClick, onBackTo
                 >
                   {isLoading ? <RefreshCw className="animate-spin" size={18} /> : <>Continue <ArrowRight size={16} /></>}
                 </button>
+
+                {canUseFingerprint && (
+                  <button
+                    type="button"
+                    onClick={handleFingerprintLogin}
+                    disabled={isFingerprintLoading || isLoading}
+                    className="w-full py-3.5 bg-white text-slate-700 border border-slate-200 rounded-xl font-semibold text-sm hover:border-primary hover:text-primary active:scale-[0.97] transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+                  >
+                    {isFingerprintLoading ? <RefreshCw className="animate-spin" size={18} /> : <><Fingerprint size={18} /> Sign in with fingerprint</>}
+                  </button>
+                )}
 
                 <button
                   type="button"

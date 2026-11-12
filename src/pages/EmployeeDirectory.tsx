@@ -36,6 +36,7 @@ import { Employee, Team, User, Shift } from '../types';
 import { useSubscription } from '../context/SubscriptionContext';
 import HelpButton from '../components/onboarding/HelpButton';
 import { useToast } from '../context/ToastContext';
+import { passkeyService } from '../services/passkey.service';
 
 
 const getScaledLogoDims = (dataUrl: string, maxSize: number): Promise<{ w: number; h: number }> =>
@@ -883,6 +884,23 @@ const EmployeeDirectory: React.FC<EmployeeDirectoryProps> = ({ user, selectedEmp
                       {showPassword ? <EyeOff size={16}/> : <Eye size={16}/>}
                     </button>
                   </div>
+                  {editingId && isAdmin && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!window.confirm(`Reset fingerprint for ${formState.name}? They will register again at their next sign-in.`)) return;
+                        try {
+                          const removed = await passkeyService.resetForEmployee(editingId);
+                          showToast(removed > 0 ? `Removed ${removed} registered fingerprint${removed > 1 ? 's' : ''}.` : 'This employee has no registered fingerprint.', 'success');
+                        } catch {
+                          showToast('Could not reset fingerprint.', 'error');
+                        }
+                      }}
+                      className="mt-1 px-1 text-xs font-semibold text-primary hover:underline"
+                    >
+                      Reset fingerprint
+                    </button>
+                  )}
                 </div>
 
                 <div className="space-y-1.5">

@@ -58,6 +58,7 @@ const AdminNotifications = lazyWithReload(() => import('./pages/AdminNotificatio
 import { navigateTo } from './utils/seo';
 import { getCurrentRoute, navigateToRoute, replaceRoute } from './utils/deeplink';
 import { PushPermissionPrompt } from './components/PushPermissionPrompt';
+import { FingerprintSetupPrompt } from './components/passkey/FingerprintSetupPrompt';
 // M-04: standalone Monetag In-Page Push. Ships switched off — see src/config/monetag.ts.
 import { classifyRoute } from './config/monetag';
 import { beginAdvertisingDocumentReset, initializeMonetagRuntimeSettings, installMonetagTagOnce, watchPageAdvertisingOptIn, type AuthState } from './utils/monetagLoader';
@@ -671,7 +672,11 @@ const AppContent: React.FC = () => {
   );
 
   const pushPrompt = !isSuperAdmin ? (
-    <PushPermissionPrompt userId={user.id} organizationId={user.organizationId as string | undefined} />
+    <>
+      <PushPermissionPrompt userId={user.id} organizationId={user.organizationId as string | undefined} />
+      {/* Fingerprint registration — not offered on the shared demo accounts. */}
+      {!subscription?.isDemo && <FingerprintSetupPrompt userId={user.id} onSignOut={logout} />}
+    </>
   ) : null;
 
   if (currentPath === 'attendance') {

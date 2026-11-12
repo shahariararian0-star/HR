@@ -11,10 +11,15 @@
 // POST { action: 'clock_out', attendanceId, checkOut, remarks, gps: { lat, lng } }
 //   Only the caller's own open record. Returns { id }.
 // 403 { error: 'OFFICE_WIFI_REQUIRED', message } when the network check fails.
+//
+// Fingerprint check-in (migration 0048): when the org has it on, both actions also need
+// passkey: { challengeId, response } from the passkey function's 'punch-options', signed by
+// one of the caller's own registered keys. 403 { error: 'FINGERPRINT_REQUIRED', message } otherwise.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { evaluateOfficeNetwork, recordOfficeNetwork, parseGps } from '../_shared/officeWifi.ts';
 import { OFFICE_WIFI_REQUIRED_MESSAGE } from '../_shared/officeNetwork.ts';
+import { PasskeyError, authenticationVerify, biometricCheckinEnabled } from '../_shared/passkey.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -66,6 +71,21 @@ Deno.serve(async (req: Request) => {
     body = await req.json();
   } catch {
     return json(400, { error: 'Invalid JSON body' });
+  }
+
+  // Fingerprint check-in: verify the proof before anything is written.
+  if ((body.action === 'clock_in' || body.action === 'clock_out')
+      && await biometricCheckinEnabled(admin, profile.organization_id)) {
+    try {
+      if (!body.passkey) throw new PasskeyError('FINGERPRINT_REQUIRED', 'Please confirm with your fingerprint to check in.');
+      await authenticationVerify(admin, req, 'punch', body.passkey, caller.id);
+    } catch (e: any) {
+      if (e instanceof PasskeyError) {
+        return json(403, { error: 'FINGERPRINT_REQUIRED', reason: e.code, message: e.message });
+      }
+      console.error('[attendance-punch] fingerprint check', e?.message || e);
+      return json(403, { error: 'FINGERPRINT_REQUIRED', message: 'Fingerprint check failed. Please try again.' });
+    }
   }
 
   try {

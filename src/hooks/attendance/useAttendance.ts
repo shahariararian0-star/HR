@@ -4,6 +4,7 @@ import { hrService } from '../../services/hrService';
 import { Attendance, AppConfig, Shift } from '../../types';
 import { useToast } from '../../context/ToastContext';
 import { isOfficeWifiRequiredError, OFFICE_WIFI_REQUIRED_MESSAGE } from '../../services/officeWifi.service';
+import { PasskeyError, isFingerprintRequiredError } from '../../services/passkey.service';
 
 export const useAttendance = (user: any, onFinish?: () => void, onOfficeWifiRequired?: () => void) => {
   const { showToast } = useToast();
@@ -135,6 +136,17 @@ export const useAttendance = (user: any, onFinish?: () => void, onOfficeWifiRequ
       if (isOfficeWifiRequiredError(err)) {
         showToast(OFFICE_WIFI_REQUIRED_MESSAGE, "warning");
         onOfficeWifiRequired?.();
+        return;
+      }
+      // Fingerprint check-in: cancelled scan, no registered fingerprint, or a refused proof.
+      if (err instanceof PasskeyError || isFingerprintRequiredError(err)) {
+        const code = (err as any)?.code;
+        const message = code === 'CANCELLED'
+          ? 'Fingerprint check was cancelled. Touch the sensor to check in.'
+          : code === 'NO_CREDENTIAL'
+            ? 'Register your fingerprint first (My Profile → Fingerprint & devices), then check in.'
+            : (err as any)?.message || 'Please confirm with your fingerprint to check in.';
+        showToast(message, 'warning');
         return;
       }
       showToast("Failed to submit attendance. Please try again.", "error");

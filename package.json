@@ -20,6 +20,7 @@
     "migrate:incremental": "node scripts/migrate-from-pb/05-incremental-attendance.mjs"
   },
   "dependencies": {
+    "@simplewebauthn/browser": "13.2.2",
     "@supabase/supabase-js": "^2.105.4",
     "@types/dompurify": "^3.0.5",
     "@vercel/analytics": "^1.6.1",
