@@ -1,5 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
+import { can } from '../../utils/permissions';
 import { hrService } from '../../services/hrService';
 import { ReviewCycle, PerformanceReview, OrgReviewConfig } from '../../types';
 import { DEFAULT_REVIEW_CONFIG } from '../../constants';
@@ -29,7 +30,7 @@ export const usePerformanceReview = (user: any) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const isAdmin = user.role === 'ADMIN' || user.role === 'HR' || user.role === 'SUPER_ADMIN';
+  const isAdmin = user.role === 'ADMIN' || (user.role === 'HR' && can(user, 'performance')) || user.role === 'SUPER_ADMIN';
 
   const fetchData = useCallback(async () => {
     setError(null);

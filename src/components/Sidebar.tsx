@@ -29,6 +29,7 @@ import {
   Star,
   Share2,
 } from 'lucide-react';
+import { can, ModuleKey } from '../utils/permissions';
 import HelpButton from './onboarding/HelpButton';
 import { BrandMark } from './shared/BrandMark';
 
@@ -90,19 +91,22 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath, navParams, onNavigate, o
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE'] },
     { id: 'profile', label: 'My Profile', icon: UserCircle, roles: ['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE'] },
     { id: 'attendance-logs', label: 'My Attendance', icon: History, roles: ['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE'] },
-    { id: 'attendance-audit', label: 'Attendance Audit', icon: List, roles: ['ADMIN', 'HR', 'MANAGER'] },
+    { id: 'attendance-audit', label: 'Attendance Audit', icon: List, roles: ['ADMIN', 'HR', 'MANAGER'], perm: 'attendance' as ModuleKey },
     { id: 'leave', label: 'Leave', icon: CalendarDays, roles: ['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE'] },
     { id: 'announcements', label: 'Announcements', icon: Megaphone, roles: ['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE'] },
-    { id: 'admin-notifications', label: 'Notifications', icon: Bell, roles: ['ADMIN', 'HR'] },
-    { id: 'employees', label: 'Team Directory', icon: Users, roles: ['ADMIN', 'HR', 'MANAGER'] },
+    { id: 'admin-notifications', label: 'Notifications', icon: Bell, roles: ['ADMIN', 'HR'], perm: 'notifications' as ModuleKey },
+    { id: 'employees', label: 'Team Directory', icon: Users, roles: ['ADMIN', 'HR', 'MANAGER'], perm: 'employees' as ModuleKey },
     { id: 'performance-review', label: 'Performance', icon: ClipboardCheck, roles: ['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE'] },
-    { id: 'organization', label: 'Organization', icon: Network, roles: ['ADMIN', 'HR'] },
-    { id: 'reports', label: 'Reports', icon: BarChart3, roles: ['ADMIN', 'HR'] },
-    { id: 'settings', label: 'Settings', icon: Settings, roles: ['ADMIN', 'HR'] },
+    { id: 'organization', label: 'Organization', icon: Network, roles: ['ADMIN', 'HR'], perm: 'organization' as ModuleKey },
+    { id: 'reports', label: 'Reports', icon: BarChart3, roles: ['ADMIN', 'HR'], perm: 'reports' as ModuleKey },
+    { id: 'settings', label: 'Settings', icon: Settings, roles: ['ADMIN', 'HR'], perm: 'settings' as ModuleKey },
   ];
 
-  const menuItems = isSuperAdmin ? superAdminMenuItems : regularMenuItems;
-  const filteredItems = menuItems.filter(item => item.roles.includes(role));
+  const menuItems: { id: string; label: string; icon: any; roles: string[]; perm?: ModuleKey }[] =
+    isSuperAdmin ? superAdminMenuItems : regularMenuItems;
+  // HR sees a page only if the Owner gave them that module (migration 0049).
+  const filteredItems = menuItems.filter(item =>
+    item.roles.includes(role) && (role !== 'HR' || !item.perm || can({ role, permissions: user?.permissions }, item.perm)));
 
   return (
     <aside className="w-64 bg-app-sidebar h-[100dvh] flex flex-col border-r border-app-border relative z-50">

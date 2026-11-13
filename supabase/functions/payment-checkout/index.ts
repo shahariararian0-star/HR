@@ -59,7 +59,7 @@ Deno.serve(async (req: Request) => {
 
   const { data: profile } = await admin
     .from('profiles')
-    .select('role, organization_id, name, mobile')
+    .select('role, organization_id, name, mobile, permissions')
     .eq('id', caller.id)
     .single();
   if (!profile) return json(403, { error: 'Profile not found' });
@@ -86,7 +86,9 @@ Deno.serve(async (req: Request) => {
     if (body.action !== 'create') return json(400, { error: 'Unknown action' });
 
     // ── Start a new payment ──────────────────────────────────────────────────
-    if (!['ADMIN', 'HR'].includes(profile.role) || !profile.organization_id) {
+    // HR needs Billing access from the Owner (migration 0049). NULL permissions = all.
+    const hrWithoutBilling = profile.role === 'HR' && Array.isArray(profile.permissions) && !profile.permissions.includes('billing');
+    if (!['ADMIN', 'HR'].includes(profile.role) || hrWithoutBilling || !profile.organization_id) {
       return json(403, { error: 'Only organization admins can pay for a plan' });
     }
 

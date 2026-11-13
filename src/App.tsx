@@ -59,6 +59,26 @@ import { navigateTo } from './utils/seo';
 import { getCurrentRoute, navigateToRoute, replaceRoute } from './utils/deeplink';
 import { PushPermissionPrompt } from './components/PushPermissionPrompt';
 import { FingerprintSetupPrompt } from './components/passkey/FingerprintSetupPrompt';
+import { can, ModuleKey } from './utils/permissions';
+
+// HR pages and the module the Owner must grant for each (migration 0049).
+const HR_ROUTE_MODULES: Record<string, ModuleKey> = {
+  'employees': 'employees',
+  'attendance-audit': 'attendance',
+  'admin-notifications': 'notifications',
+  'organization': 'organization',
+  'reports': 'reports',
+  'settings': 'settings',
+  'upgrade': 'billing',
+};
+
+const NoAccess: React.FC<{ onHome: () => void }> = ({ onHome }) => (
+  <div className="max-w-md mx-auto mt-16 text-center space-y-3">
+    <h1 className="text-xl font-semibold text-slate-900">You don't have access to this page</h1>
+    <p className="text-sm text-slate-500">Ask your company Owner to add it to your HR access.</p>
+    <button onClick={onHome} className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary-hover">Go to dashboard</button>
+  </div>
+);
 // M-04: standalone Monetag In-Page Push. Ships switched off — see src/config/monetag.ts.
 import { classifyRoute } from './config/monetag';
 import { beginAdvertisingDocumentReset, initializeMonetagRuntimeSettings, installMonetagTagOnce, watchPageAdvertisingOptIn, type AuthState } from './utils/monetagLoader';
@@ -111,6 +131,21 @@ const AppContent: React.FC = () => {
   const { user, isLoading, isConfigured, setConfigured, login, logout } = useAuth();
   const { subscription, isLoading: isSubscriptionLoading } = useSubscription();
   const [currentPath, setCurrentPath] = useState('dashboard');
+
+  // HR access list (migration 0049). The session module (frozen) rebuilds the user on reload
+  // and token refresh without `permissions`; fill it in here through its public API. Until it
+  // arrives, can() treats an HR user's access as empty.
+  useEffect(() => {
+    if (!user || user.role !== 'HR' || user.permissions !== undefined) return;
+    let cancelled = false;
+    supabase.from('profiles').select('permissions').eq('id', user.id).maybeSingle().then(({ data, error }) => {
+      if (cancelled || error) return;
+      const current = sessionManager.getSnapshot().user;
+      if (current?.id !== user.id) return;
+      sessionManager.setCurrentUser({ ...current, permissions: Array.isArray(data?.permissions) ? data!.permissions : null });
+    });
+    return () => { cancelled = true; };
+  }, [user]);
   const [navParams, setNavParams] = useState<any>(null);
 
   // Public Pages State
@@ -629,6 +664,11 @@ const AppContent: React.FC = () => {
     // Super Admin has a dedicated dashboard
     if (isSuperAdmin && (currentPath === 'dashboard' || currentPath === 'super-admin')) {
       return <SuperAdmin user={user} onNavigate={handleNavigate} tab={navParams?.tab} />;
+    }
+
+    const requiredModule = HR_ROUTE_MODULES[currentPath];
+    if (user.role === 'HR' && requiredModule && !can(user, requiredModule)) {
+      return <NoAccess onHome={() => handleNavigate('dashboard')} />;
     }
 
     switch (currentPath) {

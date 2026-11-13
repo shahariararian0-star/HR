@@ -41,7 +41,7 @@ Deno.serve(async (req: Request) => {
     // Fetch caller's profile to verify role + org
     const { data: callerProfile, error: profileErr } = await adminClient
       .from('profiles')
-      .select('role, organization_id')
+      .select('role, organization_id, permissions')
       .eq('id', caller.id)
       .single();
 
@@ -57,11 +57,25 @@ Deno.serve(async (req: Request) => {
     // Resolve target profile and enforce same-org (super admins bypass).
     const { data: targetProfile, error: targetErr } = await adminClient
       .from('profiles')
-      .select('organization_id')
+      .select('organization_id, role')
       .eq('id', userId)
       .single();
 
     if (targetErr || !targetProfile) return jsonError(404, 'Employee not found');
+
+    // Role hierarchy (migration 0049): only Super Admin acts on Super Admin; HR acts on staff
+    // only, and only with the Team Directory ('employees') access the Owner gave them.
+    if (targetProfile.role === 'SUPER_ADMIN' && callerProfile.role !== 'SUPER_ADMIN') {
+      return jsonError(403, 'This account cannot be changed here');
+    }
+    if (callerProfile.role === 'HR') {
+      if (Array.isArray(callerProfile.permissions) && !callerProfile.permissions.includes('employees')) {
+        return jsonError(403, 'Your HR access does not include Team Directory');
+      }
+      if (targetProfile.role === 'ADMIN' || targetProfile.role === 'HR') {
+        return jsonError(403, 'Only the Owner can change Owner or HR accounts');
+      }
+    }
     if (callerProfile.role !== 'SUPER_ADMIN' &&
         targetProfile.organization_id !== callerProfile.organization_id) {
       return jsonError(403, 'Cannot verify an employee from another organization');

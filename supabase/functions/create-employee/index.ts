@@ -37,13 +37,18 @@ Deno.serve(async (req: Request) => {
   // Fetch caller's profile to verify role + org
   const { data: callerProfile, error: profileErr } = await adminClient
     .from('profiles')
-    .select('role, organization_id')
+    .select('role, organization_id, permissions')
     .eq('id', caller.id)
     .single();
 
   if (profileErr || !callerProfile) return jsonError(403, 'Caller profile not found');
   if (!['ADMIN', 'HR', 'SUPER_ADMIN'].includes(callerProfile.role)) {
     return jsonError(403, 'Only ADMIN or HR can create employees');
+  }
+  // HR needs the Team Directory ('employees') access the Owner gave them (migration 0049).
+  if (callerProfile.role === 'HR' && Array.isArray(callerProfile.permissions)
+      && !callerProfile.permissions.includes('employees')) {
+    return jsonError(403, 'Your HR access does not include Team Directory');
   }
 
   try {
@@ -61,6 +66,26 @@ Deno.serve(async (req: Request) => {
     const mobile      = formData.get('mobile')?.toString()?.trim() ?? '';
     const joiningDate = formData.get('joiningDate')?.toString()?.trim() || null;
     const avatarFile  = formData.get('avatar') instanceof File ? formData.get('avatar') as File : null;
+
+    // Role hierarchy (migration 0049): the Owner (ADMIN) creates Owner, HR and staff; HR creates
+    // staff only. Nobody creates SUPER_ADMIN here.
+    const STAFF_ROLES = ['EMPLOYEE', 'TEAM_LEAD', 'MANAGER', 'MANAGEMENT'];
+    const allowedRoles = callerProfile.role === 'HR' ? STAFF_ROLES : [...STAFF_ROLES, 'HR', 'ADMIN'];
+    if (!allowedRoles.includes(role)) {
+      return jsonError(403, callerProfile.role === 'HR'
+        ? 'Only the Owner can create HR or Owner accounts'
+        : 'This role cannot be created here');
+    }
+    // HR access list, set only by the Owner, only for HR accounts. Absent = all modules.
+    const MODULE_KEYS = ['employees', 'attendance', 'leave', 'announcements', 'notifications', 'performance', 'organization', 'reports', 'settings', 'billing'];
+    let permissions: string[] | null = null;
+    const rawPermissions = formData.get('permissions')?.toString();
+    if (rawPermissions && role === 'HR' && callerProfile.role !== 'HR') {
+      try {
+        const parsed = JSON.parse(rawPermissions);
+        if (Array.isArray(parsed)) permissions = parsed.filter((k: unknown) => typeof k === 'string' && MODULE_KEYS.includes(k));
+      } catch { /* ignore malformed list: HR gets all modules */ }
+    }
 
     if (!email || !password || !name) {
       return jsonError(400, 'Missing required fields: email, password, name');
@@ -122,6 +147,7 @@ Deno.serve(async (req: Request) => {
       joining_date:    joiningDate,
       avatar:          avatarPath,
       verified:        false,
+      permissions,
     }, { onConflict: 'id' });
 
     if (profileInsertErr) {

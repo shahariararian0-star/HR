@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { can } from '../utils/permissions';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { hrService } from '../services/hrService';
 import { LeaveRequest, LeaveBalance } from '../types';
@@ -19,7 +20,8 @@ interface LeaveProps {
 }
 
 const Leave: React.FC<LeaveProps> = ({ user, autoOpen, openLeaveId }) => {
-  const isAdmin = user.role === 'ADMIN' || user.role === 'HR';
+  // Owner, or HR with Leave access (migration 0049).
+  const isAdmin = user.role === 'ADMIN' || (user.role === 'HR' && can(user, 'leave'));
   const isManager = user.role === 'MANAGER' || user.role === 'TEAM_LEAD' || user.role === 'MANAGEMENT';
 
   // Subscription check

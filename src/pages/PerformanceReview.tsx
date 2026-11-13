@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { can } from '../utils/permissions';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { useSubscription } from '../context/SubscriptionContext';
 import { usePerformanceReview } from '../hooks/review/usePerformanceReview';
@@ -13,7 +14,7 @@ interface Props {
 }
 
 const PerformanceReview: React.FC<Props> = ({ user }) => {
-  const isAdmin = user.role === 'ADMIN' || user.role === 'HR' || user.role === 'SUPER_ADMIN';
+  const isAdmin = user.role === 'ADMIN' || (user.role === 'HR' && can(user, 'performance')) || user.role === 'SUPER_ADMIN';
   const isManager = user.role === 'MANAGER' || user.role === 'TEAM_LEAD' || user.role === 'MANAGEMENT';
 
   const { canPerformAction, subscription } = useSubscription();

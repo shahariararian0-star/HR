@@ -37,6 +37,7 @@ import { useSubscription } from '../context/SubscriptionContext';
 import HelpButton from '../components/onboarding/HelpButton';
 import { useToast } from '../context/ToastContext';
 import { passkeyService } from '../services/passkey.service';
+import { can, isOwner, assignableRoles, canManageAccount, MODULES, DEFAULT_HR_PERMISSIONS, ROLE_LABELS } from '../utils/permissions';
 
 
 const getScaledLogoDims = (dataUrl: string, maxSize: number): Promise<{ w: number; h: number }> =>
@@ -74,7 +75,9 @@ interface EmployeeDirectoryProps {
 
 const EmployeeDirectory: React.FC<EmployeeDirectoryProps> = ({ user, selectedEmployeeId }) => {
   const { showToast } = useToast();
-  const isAdmin = user?.role === 'ADMIN' || user?.role === 'HR';
+  // Owner, or HR with Team Directory access (migration 0049).
+  const isAdmin = can(user, 'employees');
+  const roleOptions = assignableRoles(user);
   const isManager = user?.role === 'MANAGER' || user?.role === 'TEAM_LEAD';
 
   // Subscription check
@@ -205,7 +208,8 @@ const EmployeeDirectory: React.FC<EmployeeDirectoryProps> = ({ user, selectedEmp
     workType: 'OFFICE' as any,
     lineManagerId: '',
     teamId: '',
-    shiftId: ''
+    shiftId: '',
+    permissions: [...DEFAULT_HR_PERMISSIONS] as string[],
   };
 
   const [formState, setFormState] = useState(initialNewEmpState);
@@ -292,7 +296,9 @@ const EmployeeDirectory: React.FC<EmployeeDirectoryProps> = ({ user, selectedEmp
       workType: emp.workType || 'OFFICE',
       lineManagerId: emp.lineManagerId || '',
       teamId: emp.teamId || '',
-      shiftId: emp.shiftId || ''
+      shiftId: emp.shiftId || '',
+      // null = all modules (HR created before access lists existed)
+      permissions: Array.isArray((emp as any).permissions) ? [...(emp as any).permissions] : MODULES.map(m => m.key),
     });
     setShowModal(true);
   };
@@ -364,13 +370,17 @@ const EmployeeDirectory: React.FC<EmployeeDirectoryProps> = ({ user, selectedEmp
       isEdit: !!editingId
     });
 
+    // HR access list is the Owner's to set, and only for HR accounts.
+    const submitState: any = { ...formState };
+    if (!(isOwner(user) && formState.role === 'HR')) delete submitState.permissions;
+
     try {
       if (editingId) {
         console.log('[EmployeeDirectory] Updating employee:', editingId);
-        await hrService.updateProfile(editingId, formState as any);
+        await hrService.updateProfile(editingId, submitState);
       } else {
         console.log('[EmployeeDirectory] Creating new employee');
-        await hrService.addEmployee(formState as any);
+        await hrService.addEmployee(submitState);
       }
       setShowModal(false);
     } catch (err: any) {
@@ -696,7 +706,7 @@ const EmployeeDirectory: React.FC<EmployeeDirectoryProps> = ({ user, selectedEmp
                   </div>
                 </div>
                 {/* Action buttons on their own row so names never break */}
-                {isAdmin && (
+                {isAdmin && canManageAccount(user, emp.role) && emp.id !== user?.id && (
                   <div className="flex gap-0.5 mt-2 bg-slate-50/80 p-1 rounded-lg self-start" onClick={(e) => e.stopPropagation()}>
                     {!emp.verified && (
                       <button onClick={() => handleActivate(emp)} title="Verify & activate account" className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-all"><BadgeCheck size={14} /></button>
@@ -850,14 +860,37 @@ const EmployeeDirectory: React.FC<EmployeeDirectoryProps> = ({ user, selectedEmp
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest px-1">Access Level</label>
                     <select className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm outline-none focus:ring-4 focus:ring-primary-light" value={formState.role} onChange={e => setFormState({...formState, role: e.target.value as any})}>
-                      <option value="EMPLOYEE">Employee</option>
-                      <option value="MANAGER">Manager</option>
-                      <option value="TEAM_LEAD">Team Leader</option>
-                      <option value="MANAGEMENT">Management</option>
-                      <option value="HR">HR Specialist</option>
-                      <option value="ADMIN">Administrator</option>
+                      {roleOptions.map(r => <option key={r} value={r}>{ROLE_LABELS[r] || r}</option>)}
+                      {/* Keep the current value visible if it is not one this user may assign */}
+                      {!roleOptions.includes(formState.role as any) && <option value={formState.role}>{ROLE_LABELS[formState.role] || formState.role}</option>}
                     </select>
                   </div>
+                  {isOwner(user) && formState.role === 'HR' && (
+                    <div className="md:col-span-2 space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <p className="text-sm font-semibold text-slate-800">HR access</p>
+                      <p className="text-xs text-slate-500">Choose what this HR person can use. They can only create Team Leaders, Managers, Management and Employees.</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                        {MODULES.map(m => {
+                          const checked = (formState.permissions || []).includes(m.key);
+                          return (
+                            <label key={m.key} className="flex items-start gap-2 cursor-pointer text-sm">
+                              <input
+                                type="checkbox"
+                                className="mt-0.5 w-4 h-4 accent-primary"
+                                checked={checked}
+                                onChange={e => {
+                                  const current = new Set(formState.permissions || []);
+                                  if (e.target.checked) current.add(m.key); else current.delete(m.key);
+                                  setFormState({ ...formState, permissions: MODULES.map(x => x.key).filter(k => current.has(k)) });
+                                }}
+                              />
+                              <span><span className="font-semibold text-slate-700">{m.label}</span><span className="block text-xs text-slate-500">{m.hint}</span></span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 

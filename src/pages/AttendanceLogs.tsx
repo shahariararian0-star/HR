@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { can } from '../utils/permissions';
 import {
   Clock, MapPin, History, Search, RefreshCw, ChevronRight, ExternalLink,
   Camera, X, SortAsc, SortDesc, Users, Building, Trash2, Save,
@@ -58,7 +59,7 @@ const AttendanceLogs: React.FC<AttendanceLogsProps> = ({ user, viewMode = 'MY', 
   const { showToast } = useToast();
   const isSuperAdmin = user.role === 'SUPER_ADMIN';
   // Super Admin audits any organization with the same rights as that organization's Admin.
-  const isAdmin = user.role === 'ADMIN' || user.role === 'HR' || isSuperAdmin;
+  const isAdmin = user.role === 'ADMIN' || (user.role === 'HR' && can(user, 'attendance')) || isSuperAdmin;
   const isManager = user.role === 'MANAGER';
   const isAuditMode = viewMode === 'AUDIT' && (isAdmin || isManager);
   

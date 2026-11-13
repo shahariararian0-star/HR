@@ -34,6 +34,7 @@ function mapProfileToEmployee(r: any): Employee {
     location: r.location || '',
     workType: r.work_type || 'OFFICE',
     verified: !!r.verified,
+    permissions: Array.isArray(r.permissions) ? r.permissions : null,
   } as any;
 }
 
@@ -94,6 +95,10 @@ export const employeeService = {
     if (emp.shiftId)     formData.append('shiftId', emp.shiftId);
     if (emp.mobile)      formData.append('mobile', emp.mobile);
     if (emp.joiningDate) formData.append('joiningDate', emp.joiningDate);
+    // HR access list (Owner only; the server ignores it otherwise). Migration 0049.
+    if (emp.role?.toUpperCase() === 'HR' && Array.isArray((emp as any).permissions)) {
+      formData.append('permissions', JSON.stringify((emp as any).permissions));
+    }
 
     // Avatar: data URL → Blob
     if (emp.avatar && typeof emp.avatar === 'string' && emp.avatar.startsWith('data:')) {
@@ -120,6 +125,8 @@ export const employeeService = {
     const payload: any = {};
     if (updates.name !== undefined)        payload.name = updates.name;
     if (updates.role !== undefined)        payload.role = updates.role.toUpperCase();
+    // HR access list: sent only when the Owner edits it (migration 0049).
+    if (updates.permissions !== undefined) payload.permissions = updates.permissions;
     if (updates.department !== undefined)  payload.department = updates.department;
     if (updates.designation !== undefined) payload.designation = updates.designation;
     if (updates.employeeId !== undefined)  payload.employee_id = updates.employeeId;

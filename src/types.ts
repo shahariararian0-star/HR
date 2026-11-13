@@ -126,6 +126,8 @@ export interface User {
   shiftId?: string;
   organizationId?: string;
   verified?: boolean;
+  /** HR only: module keys this person may use. null / undefined = all (migration 0049). */
+  permissions?: string[] | null;
 }
 
 export interface Employee extends User {

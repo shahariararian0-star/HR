@@ -1,5 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
+import { can } from '../utils/permissions';
 import { Megaphone, Plus, Loader2, AlertTriangle, Inbox } from 'lucide-react';
 import { hrService } from '../services/hrService';
 import { Announcement } from '../types';
@@ -21,7 +22,8 @@ const Announcements: React.FC<Props> = ({ user }) => {
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
-  const isAdminHR = user.role === 'ADMIN' || user.role === 'HR';
+  // Owner, or HR with Announcements access (migration 0049).
+  const isAdminHR = user.role === 'ADMIN' || (user.role === 'HR' && can(user, 'announcements'));
   // Matches the announcements_insert RLS policy — other roles would be rejected by the database.
   const canPost = canWrite && ['ADMIN', 'HR', 'MANAGER'].includes(user.role);
 
